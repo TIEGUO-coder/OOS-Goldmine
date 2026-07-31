@@ -24,6 +24,10 @@ It asks the question builders actually care about:
 
 ## Demo / 演示
 
+Live demo / 在线演示:
+
+[https://tieguo-coder.github.io/OOS-Goldmine/](https://tieguo-coder.github.io/OOS-Goldmine/)
+
 Run it locally and search a builder topic such as:
 
 本地运行后，可以搜索这些方向：
