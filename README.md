@@ -28,6 +28,10 @@ Live demo / 在线演示:
 
 [https://tieguo-coder.github.io/OOS-Goldmine/](https://tieguo-coder.github.io/OOS-Goldmine/)
 
+If the link returns 404 after the first push, enable GitHub Pages with `Settings -> Pages -> Deploy from a branch -> gh-pages / root`.
+
+如果首次 push 后链接是 404，请在 GitHub 仓库里启用 Pages：`Settings -> Pages -> Deploy from a branch -> gh-pages / root`。
+
 Run it locally and search a builder topic such as:
 
 本地运行后，可以搜索这些方向：
