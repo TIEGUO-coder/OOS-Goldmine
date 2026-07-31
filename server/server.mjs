@@ -75,6 +75,20 @@ const STOP_WORDS = new Set([
   "info",
   "width",
   "src",
+  "have",
+  "file",
+  "files",
+  "node",
+  "module",
+  "modules",
+  "line",
+  "local",
+  "internal",
+  "python",
+  "java",
+  "test",
+  "tests",
+  "trying",
 ]);
 
 const DEMAND_WORDS = [
@@ -140,7 +154,18 @@ const CATEGORY_RULES = [
   },
 ];
 
-const QUERY_STOP_WORDS = new Set(["tool", "tools", "app", "apps", "project", "projects", "open", "source", "oss"]);
+const QUERY_STOP_WORDS = new Set(["tool", "tools", "app", "apps", "project", "projects", "open", "source", "oss", "developer"]);
+const TOPIC_ALIASES = {
+  documentation: ["docs", "doc", "documentation", "readme", "wiki", "storybook", "docusaurus", "mkdocs"],
+  migration: ["migration", "migrate", "convert", "converter", "schema"],
+  database: ["database", "sql", "postgres", "mysql", "sqlite", "mongodb"],
+  openapi: ["openapi", "swagger", "api"],
+  security: ["security", "scan", "scanner", "vulnerability", "audit", "jwt", "auth"],
+  browser: ["browser", "chrome", "firefox", "extension", "webextension"],
+  extensions: ["extension", "extensions", "chrome", "firefox", "webextension"],
+  coding: ["coding", "code", "programming", "developer"],
+  ai: ["ai", "llm", "gpt", "agent", "copilot"],
+};
 
 function json(res, status, body) {
   res.writeHead(status, {
@@ -247,7 +272,16 @@ function relevanceScore(repo, topic) {
   const terms = topicTerms(topic);
   if (!terms.length) return 1;
   const text = `${repo.name} ${repo.full_name} ${repo.description || ""} ${(repo.topics || []).join(" ")}`.toLowerCase();
-  return terms.reduce((score, term) => score + (text.includes(term) ? 1 : 0), 0);
+  return terms.reduce((score, term) => {
+    const aliases = TOPIC_ALIASES[term] || [term];
+    return score + (aliases.some((alias) => text.includes(alias)) ? 1 : 0);
+  }, 0);
+}
+
+function hasMinimumTopicFit(repo, topic) {
+  const terms = topicTerms(topic);
+  if (terms.length <= 1) return relevanceScore(repo, topic) > 0;
+  return relevanceScore(repo, topic) >= Math.min(2, terms.length);
 }
 
 function isLikelyPersonalConfigRepo(repo) {
@@ -506,7 +540,7 @@ async function findOpportunities(topic, page, token) {
   );
 
   const candidates = (data.items || [])
-    .filter((repo) => relevanceScore(repo, topic) > 0)
+    .filter((repo) => hasMinimumTopicFit(repo, topic))
     .filter((repo) => !isLikelyPersonalConfigRepo(repo))
     .slice(0, 6);
 
