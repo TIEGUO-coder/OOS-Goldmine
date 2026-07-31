@@ -64,6 +64,20 @@ Each opportunity card includes:
 - **Evidence links / 证据链接**
 - **AI Build Plan / AI 开工计划**
 
+The current version does real GitHub evidence checks, not only static demo cards:
+
+当前版本会做真实 GitHub 证据检查，不只是静态 demo 卡：
+
+- Fetch repository metadata / 拉取仓库元数据
+- Fetch top open issues / 拉取高评论 open issues
+- Fetch recently closed issues / 拉取最近关闭的 issues
+- Fetch open pull requests / 拉取 open PR
+- Fetch recent commits in the last 90 days / 拉取最近 90 天提交
+- Fetch recent releases / 拉取最近 releases
+- Cluster demand-like issue themes / 聚类需求型 issue 主题
+- Flag stale issues and stale PRs / 标记过期 issue 和过期 PR
+- Penalize likely obsolete projects / 对可能已被平台替代的项目扣分
+
 ## Why It May Get Stars / 为什么可能拿 star
 
 OSS builders love tools that help them find unfair starting points.
@@ -133,6 +147,9 @@ What each signal means:
 | Open issues / open issue 数 | Unresolved demand / 尚未解决的需求 |
 | Quiet months / 静默月份 | Maintenance gap / 维护缺口 |
 | Forks / fork 数 | Revival or adaptation interest / 接手或改造兴趣 |
+| Demand-like issues / 需求型 issue | Repeated requests for support, migration, integration, export, CLI, API, etc. / 重复出现的支持、迁移、集成、导出、命令行、API 等需求 |
+| Recent commits / 近期提交 | Active maintenance reduces the gap / 维护仍活跃会降低缺口 |
+| Stale PRs / 过期 PR | Contributor demand may exist but review capacity may be low / 可能有人愿意贡献，但 review 能力不足 |
 | Penalties / 扣分项 | Archived repos or weak issue evidence / 已归档仓库或 issue 证据弱 |
 
 This is not meant to be a final investment decision. It is a fast filter for builders.

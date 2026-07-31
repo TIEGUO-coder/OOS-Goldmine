@@ -449,6 +449,42 @@ input {
   border-radius: 8px;
 }
 
+.signalGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid #e4ddcf;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.signalGrid div {
+  display: grid;
+  gap: 4px;
+  min-height: 58px;
+  padding: 10px;
+  border-right: 1px solid #e4ddcf;
+  border-bottom: 1px solid #e4ddcf;
+  background: #fbfaf4;
+}
+
+.signalGrid div:nth-child(3n) {
+  border-right: 0;
+}
+
+.signalGrid div:nth-last-child(-n + 3) {
+  border-bottom: 0;
+}
+
+.signalGrid span {
+  color: #6f786f;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.signalGrid strong {
+  font-size: 16px;
+}
+
 .themes {
   display: flex;
   flex-wrap: wrap;
@@ -464,6 +500,65 @@ input {
   font-weight: 800;
 }
 
+.riskBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #ead6a4;
+  background: #fff7dc;
+  color: #62451c;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.alternatives {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.alternatives span {
+  padding: 6px 9px;
+  border: 1px solid #d6decd;
+  background: #f4f7ed;
+  color: #4b5f3e;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.clusterList {
+  display: grid;
+  gap: 8px;
+}
+
+.cluster {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 10px;
+  border: 1px solid #e4ddcf;
+  background: #faf7ee;
+  border-radius: 8px;
+}
+
+.cluster strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cluster span {
+  flex: 0 0 auto;
+  color: #6f786f;
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .issueList {
   display: grid;
   gap: 8px;
@@ -471,7 +566,7 @@ input {
 
 .issueList a {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 16px;
+  grid-template-columns: minmax(0, 1fr) auto 16px;
   align-items: center;
   gap: 8px;
   padding: 9px 10px;
@@ -485,6 +580,17 @@ input {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.issueList em {
+  padding: 3px 6px;
+  background: #e8f1e9;
+  color: #315640;
+  border-radius: 999px;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 900;
+  text-transform: uppercase;
 }
 
 .spin {
@@ -538,6 +644,25 @@ input {
 
   .evidence {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .signalGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .signalGrid div,
+  .signalGrid div:nth-child(3n),
+  .signalGrid div:nth-last-child(-n + 3) {
+    border-right: 1px solid #e4ddcf;
+    border-bottom: 1px solid #e4ddcf;
+  }
+
+  .signalGrid div:nth-child(2n) {
+    border-right: 0;
+  }
+
+  .signalGrid div:nth-last-child(-n + 2) {
+    border-bottom: 0;
   }
 
   .evidence div:nth-child(2) {

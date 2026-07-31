@@ -4,6 +4,7 @@ import {
   AlertCircle,
   ArrowRight,
   Copy,
+  ShieldAlert,
   ExternalLink,
   Github,
   Loader2,
@@ -99,7 +100,77 @@ const STOP_WORDS = new Set([
   "does",
   "work",
   "working",
+  "github",
+  "version",
+  "problem",
+  "example",
+  "project",
+  "repo",
+  "repository",
 ]);
+
+const DEMAND_WORDS = [
+  "feature",
+  "support",
+  "integration",
+  "migration",
+  "export",
+  "import",
+  "plugin",
+  "api",
+  "openapi",
+  "typescript",
+  "react",
+  "chrome",
+  "firefox",
+  "docker",
+  "self-hosted",
+  "local",
+  "offline",
+  "ci",
+  "cli",
+  "generate",
+  "convert",
+  "compatibility",
+];
+
+const BUG_WORDS = ["bug", "error", "crash", "broken", "fail", "exception", "cannot", "doesn't", "not working"];
+const INSTALL_WORDS = ["install", "setup", "build", "dependency", "npm", "yarn", "docker", "windows", "macos", "linux"];
+
+const CATEGORY_RULES = [
+  {
+    match: ["api", "openapi", "postman", "rest", "graphql"],
+    wedge: "API collection migration diff",
+    wedgeZh: "API 集合迁移差异报告",
+    risk: "High competition / 竞争强",
+    alternatives: ["Postman", "Insomnia", "Hoppscotch", "Bruno"],
+    why: "完整 API 客户端竞争很强。更好的切口是迁移差异、响应对比、回归测试报告，而不是重做客户端。",
+  },
+  {
+    match: ["react", "frontend", "performance", "render", "profiler"],
+    wedge: "React performance audit companion",
+    wedgeZh: "React 性能审计配套工具",
+    risk: "Medium competition / 竞争中等",
+    alternatives: ["React DevTools Profiler", "Chrome Performance Panel", "Lighthouse"],
+    why: "完整 devtool 不容易打，但 issue 驱动的性能审计、迁移建议、报告生成更适合小团队。",
+  },
+  {
+    match: ["browser", "extension", "chrome", "firefox"],
+    wedge: "extension compatibility checker",
+    wedgeZh: "浏览器扩展兼容性检查器",
+    risk: "Medium competition / 竞争中等",
+    alternatives: ["Chrome Extension Manifest tools", "browser-extension-template"],
+    why: "浏览器平台变化会制造兼容性缺口，适合做迁移和检测工具，而不是重做整个扩展。",
+  },
+  {
+    match: ["debugger", "debugging", "node-inspector"],
+    wedge: "modern debugger migration guide",
+    wedgeZh: "现代调试器迁移指南",
+    risk: "Likely obsolete / 可能已被平台替代",
+    alternatives: ["Chrome DevTools", "Node.js inspector", "VS Code debugger"],
+    why: "这类需求可能已经被官方调试能力覆盖，更适合做迁移指南或跳过，不适合复刻老工具。",
+  },
+];
 
 function monthsSince(dateString) {
   if (!dateString) return 0;
@@ -112,16 +183,49 @@ function compactNumber(value) {
   return new Intl.NumberFormat("en", { notation: "compact" }).format(value || 0);
 }
 
-function scoreRepo(repo) {
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function issueAgeMonths(issue) {
+  return monthsSince(issue.updated_at || issue.created_at);
+}
+
+function issueText(issue) {
+  return `${issue.title || ""} ${issue.body || ""} ${(issue.labels || []).map((label) => label.name).join(" ")}`.toLowerCase();
+}
+
+function hasAny(text, words) {
+  return words.some((word) => text.includes(word));
+}
+
+function scoreRepo(repo, analysis = null) {
   const monthsQuiet = monthsSince(repo.pushed_at);
   const starSignal = Math.min(30, Math.log10((repo.stargazers_count || 0) + 1) * 9);
   const issueSignal = Math.min(30, Math.log2((repo.open_issues_count || 0) + 1) * 5);
   const maintenanceGap = Math.min(25, monthsQuiet * 1.35);
   const forkSignal = Math.min(15, Math.log10((repo.forks_count || 0) + 1) * 6);
+  const demandSignal = analysis ? Math.min(18, analysis.demandIssues * 2.4 + analysis.clusterCount * 2.2) : 0;
+  const staleIssueSignal = analysis ? Math.min(12, analysis.staleOpenIssues * 1.6) : 0;
+  const activeMaintainerPenalty = analysis?.recentCommitCount > 8 ? 18 : analysis?.recentCommitCount > 2 ? 8 : 0;
   const archivedPenalty = repo.archived ? 28 : 0;
   const emptyIssuePenalty = repo.open_issues_count === 0 ? 14 : 0;
+  const obsoletePenalty = analysis?.obsoleteRisk === "high" ? 18 : 0;
   const score = Math.round(
-    Math.max(0, Math.min(100, starSignal + issueSignal + maintenanceGap + forkSignal - archivedPenalty - emptyIssuePenalty))
+    clamp(
+      starSignal +
+        issueSignal +
+        maintenanceGap +
+        forkSignal +
+        demandSignal +
+        staleIssueSignal -
+        activeMaintainerPenalty -
+        archivedPenalty -
+        emptyIssuePenalty -
+        obsoletePenalty,
+      0,
+      100
+    )
   );
 
   return {
@@ -147,31 +251,82 @@ function extractThemes(issues) {
     .map(([word]) => word);
 }
 
-function classifyOpportunity(repo, themes, score) {
-  const text = `${repo.name} ${repo.description || ""} ${(repo.topics || []).join(" ")} ${themes.join(" ")}`.toLowerCase();
+function analyzeIssueClusters(issues) {
+  const realIssues = issues.filter((issue) => !issue.pull_request);
+  const openIssues = realIssues.filter((issue) => issue.state === "open");
+  const demandItems = [];
+  const bugItems = [];
+  const installItems = [];
+  const staleOpenItems = [];
 
-  if (text.includes("api") || text.includes("openapi") || text.includes("postman")) {
+  realIssues.forEach((issue) => {
+    const text = issueText(issue);
+    if (hasAny(text, DEMAND_WORDS)) demandItems.push(issue);
+    if (hasAny(text, BUG_WORDS)) bugItems.push(issue);
+    if (hasAny(text, INSTALL_WORDS)) installItems.push(issue);
+    if (issue.state === "open" && issueAgeMonths(issue) >= 6) staleOpenItems.push(issue);
+  });
+
+  const counts = new Map();
+  realIssues.forEach((issue) => {
+    const words = (issueText(issue).match(/[a-z][a-z0-9-]{3,}/g) || []).filter((word) => !STOP_WORDS.has(word));
+    for (let index = 0; index < words.length; index += 1) {
+      const one = words[index];
+      counts.set(one, (counts.get(one) || 0) + 1);
+      if (words[index + 1]) {
+        const two = `${one} ${words[index + 1]}`;
+        counts.set(two, (counts.get(two) || 0) + 1.8);
+      }
+    }
+  });
+
+  const clusters = [...counts.entries()]
+    .filter(([, count]) => count >= 2)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6)
+    .map(([name, count]) => ({
+      name,
+      count: Math.round(count),
+      examples: realIssues.filter((issue) => issueText(issue).includes(name.split(" ")[0])).slice(0, 2),
+    }));
+
+  return {
+    issues: realIssues,
+    openIssues,
+    demandItems,
+    bugItems,
+    installItems,
+    staleOpenItems,
+    clusters,
+    themes: clusters.slice(0, 5).map((cluster) => cluster.name),
+  };
+}
+
+function categoryFor(repo, themes) {
+  const text = `${repo.name} ${repo.description || ""} ${(repo.topics || []).join(" ")} ${themes.join(" ")}`.toLowerCase();
+  return CATEGORY_RULES.find((rule) => rule.match.some((word) => text.includes(word))) || null;
+}
+
+function classifyOpportunity(repo, themes, score, analysis = null) {
+  const category = categoryFor(repo, themes);
+  if (analysis?.obsoleteRisk === "high") {
     return {
-      verdict: "Adapt",
-      wedge: "API collection migration diff",
-      wedgeZh: "API 集合迁移差异报告",
-      why: "完整 API 客户端竞争很强，但集合迁移、响应差异、回归测试这些周边切口更小、更适合 AI builder。",
+      verdict: "Skip",
+      wedge: category?.wedge || "migration note, not a product",
+      wedgeZh: category?.wedgeZh || "迁移说明，不建议做产品",
+      why: "维护缺口很明显，但平台或成熟替代品可能已经解决核心需求。更适合写迁移指南或跳过。",
+      alternatives: category?.alternatives || [],
+      risk: category?.risk || "Likely obsolete / 可能过时",
     };
   }
-  if (text.includes("react") || text.includes("frontend") || text.includes("performance")) {
+  if (category) {
     return {
       verdict: "Adapt",
-      wedge: "React performance audit companion",
-      wedgeZh: "React 性能审计配套工具",
-      why: "不要重做完整 devtool，可以做 issue 驱动的性能检查、迁移建议或报告生成器。",
-    };
-  }
-  if (text.includes("browser") || text.includes("extension") || text.includes("chrome")) {
-    return {
-      verdict: "Adapt",
-      wedge: "extension compatibility checker",
-      wedgeZh: "浏览器扩展兼容性检查器",
-      why: "浏览器扩展容易因为平台变化变慢维护，适合做迁移、兼容性和替代路线工具。",
+      wedge: category.wedge,
+      wedgeZh: category.wedgeZh,
+      why: category.why,
+      alternatives: category.alternatives,
+      risk: category.risk,
     };
   }
   if (score >= 75) {
@@ -180,6 +335,8 @@ function classifyOpportunity(repo, themes, score) {
       wedge: "narrow companion tool",
       wedgeZh: "窄切口配套工具",
       why: "需求和维护缺口都明显，但建议先做周边小工具，避免复刻整个项目。",
+      alternatives: [],
+      risk: "Needs competitor check / 需要竞品检查",
     };
   }
   return {
@@ -187,10 +344,52 @@ function classifyOpportunity(repo, themes, score) {
     wedge: "evidence-first exploration",
     wedgeZh: "证据优先探索",
     why: "信号还不够强，应该先看 issue 聚类和替代品，再决定是否开工。",
+    alternatives: [],
+    risk: "Low confidence / 低置信度",
   };
 }
 
-function aiPlan(repo, opportunity, themes) {
+function buildAnalysis(repo, issueBundle, pulls = [], commits = [], releases = []) {
+  const category = categoryFor(repo, issueBundle.themes);
+  const recentCommitCount = commits.length;
+  const staleOpenIssues = issueBundle.staleOpenItems.length;
+  const demandIssues = issueBundle.demandItems.length;
+  const clusterCount = issueBundle.clusters.length;
+  const openPulls = pulls.filter((pull) => pull.state === "open");
+  const stalePulls = openPulls.filter((pull) => issueAgeMonths(pull) >= 3);
+  const lastRelease = releases[0]?.published_at || releases[0]?.created_at || null;
+  const obsoleteRisk =
+    category?.risk?.includes("obsolete") || (repo.name || "").toLowerCase().includes("inspector")
+      ? "high"
+      : "normal";
+  const confidence = clamp(
+    36 +
+      Math.min(24, demandIssues * 3) +
+      Math.min(18, clusterCount * 3) +
+      Math.min(12, staleOpenIssues * 1.2) +
+      (recentCommitCount === 0 ? 8 : recentCommitCount > 8 ? -12 : 0) -
+      (obsoleteRisk === "high" ? 18 : 0),
+    0,
+    100
+  );
+
+  return {
+    demandIssues,
+    bugIssues: issueBundle.bugItems.length,
+    installIssues: issueBundle.installItems.length,
+    staleOpenIssues,
+    clusterCount,
+    clusters: issueBundle.clusters,
+    recentCommitCount,
+    openPulls: openPulls.length,
+    stalePulls: stalePulls.length,
+    lastRelease,
+    obsoleteRisk,
+    confidence: Math.round(confidence),
+  };
+}
+
+function aiPlan(repo, opportunity, themes, analysis = null) {
   const themeLine = themes.length ? themes.join(", ") : "open issues, stale requests, migration pain";
   return `Build brief for ${repo.full_name}
 
@@ -203,10 +402,16 @@ Evidence to inspect:
 - Stars: ${repo.stargazers_count}
 - Last push: ${repo.pushed_at?.slice(0, 10) || "unknown"}
 - Repeated themes: ${themeLine}
+- Demand-like issues: ${analysis?.demandIssues ?? "unknown"}
+- Stale open issues: ${analysis?.staleOpenIssues ?? "unknown"}
+- Recent commits in 90 days: ${analysis?.recentCommitCount ?? "unknown"}
+- Open PRs: ${analysis?.openPulls ?? "unknown"}
+- Known alternatives to check: ${(opportunity.alternatives || []).join(", ") || "unknown"}
 
 Do not build:
 - Do not clone the full original project.
 - Do not frame this as replacing the maintainer.
+- Do not skip competitor checks just because the repository is old.
 
 Build the smallest useful wedge:
 1. Research agent: summarize the top 30 open issues and group repeated requests.
@@ -227,29 +432,38 @@ function demoCards() {
         : repo.name === "react-perf-devtool"
           ? ["react", "render", "performance", "chrome", "profiler"]
           : ["debugger", "chrome", "node", "legacy", "migration"];
-    const scored = scoreRepo(repo);
-    const opportunity = classifyOpportunity(repo, themes, scored.score);
+    const issueBundle = analyzeIssueClusters([
+      {
+        id: `${repo.id}-issue-1`,
+        state: "open",
+        title: "Sample evidence: repeated requests need live issue clustering",
+        html_url: `${repo.html_url}/issues`,
+        updated_at: "2024-01-01T00:00:00Z",
+        labels: [{ name: "feature" }],
+      },
+      {
+        id: `${repo.id}-issue-2`,
+        state: "open",
+        title: "Sample evidence: maintenance gap should be checked against alternatives",
+        html_url: `${repo.html_url}/issues`,
+        updated_at: "2023-01-01T00:00:00Z",
+        labels: [{ name: "support" }],
+      },
+    ]);
+    const analysis = buildAnalysis(repo, issueBundle, [], [], []);
+    const scored = scoreRepo(repo, analysis);
+    const opportunity = classifyOpportunity(repo, themes, scored.score, analysis);
 
     return {
       repo,
-      issues: [
-        {
-          id: `${repo.id}-issue-1`,
-          title: "Sample evidence: repeated requests need live issue clustering",
-          html_url: `${repo.html_url}/issues`,
-        },
-        {
-          id: `${repo.id}-issue-2`,
-          title: "Sample evidence: maintenance gap should be checked against alternatives",
-          html_url: `${repo.html_url}/issues`,
-        },
-      ],
+      issues: issueBundle.issues.slice(0, 4),
       themes,
       score: scored.score,
       monthsQuiet: scored.monthsQuiet,
       maintenanceLevel: scored.maintenanceLevel,
+      analysis,
       opportunity,
-      plan: aiPlan(repo, opportunity, themes),
+      plan: aiPlan(repo, opportunity, themes, analysis),
       sample: true,
     };
   });
@@ -271,37 +485,54 @@ async function githubFetch(url, token) {
   return response.json();
 }
 
+async function safeGithubFetch(url, token, fallback) {
+  try {
+    return await githubFetch(url, token);
+  } catch {
+    return fallback;
+  }
+}
+
+async function fetchRepoEvidence(repo, token) {
+  const base = `https://api.github.com/repos/${repo.full_name}`;
+  const since = new Date(Date.now() - 1000 * 60 * 60 * 24 * 90).toISOString();
+  const [openIssues, closedIssues, openPulls, recentCommits, releases] = await Promise.all([
+    safeGithubFetch(`${base}/issues?state=open&per_page=30&sort=comments&direction=desc`, token, []),
+    safeGithubFetch(`${base}/issues?state=closed&per_page=20&sort=updated&direction=desc`, token, []),
+    safeGithubFetch(`${base}/pulls?state=open&per_page=20&sort=updated&direction=desc`, token, []),
+    safeGithubFetch(`${base}/commits?since=${encodeURIComponent(since)}&per_page=20`, token, []),
+    safeGithubFetch(`${base}/releases?per_page=5`, token, []),
+  ]);
+
+  const allIssues = [...openIssues, ...closedIssues].filter((issue) => !issue.pull_request);
+  const issueBundle = analyzeIssueClusters(allIssues);
+  const analysis = buildAnalysis(repo, issueBundle, openPulls, recentCommits, releases);
+  return { issueBundle, analysis };
+}
+
 async function findOpportunities(topic, token, page) {
-  const query = encodeURIComponent(`${topic} stars:>300 archived:false`);
+  const query = encodeURIComponent(`${topic} stars:>300 archived:false pushed:<2025-01-01`);
   const searchUrl = `https://api.github.com/search/repositories?q=${query}&sort=updated&order=asc&per_page=12&page=${page}`;
   const data = await githubFetch(searchUrl, token);
   const repos = data.items || [];
 
   const cards = await Promise.all(
-    repos.slice(0, 8).map(async (repo) => {
-      let issues = [];
-      try {
-        issues = await githubFetch(
-          `https://api.github.com/repos/${repo.full_name}/issues?state=open&per_page=15&sort=comments&direction=desc`,
-          token
-        );
-      } catch {
-        issues = [];
-      }
-      const realIssues = issues.filter((issue) => !issue.pull_request);
-      const themes = extractThemes(realIssues);
-      const scored = scoreRepo(repo);
-      const opportunity = classifyOpportunity(repo, themes, scored.score);
+    repos.slice(0, 6).map(async (repo) => {
+      const { issueBundle, analysis } = await fetchRepoEvidence(repo, token);
+      const themes = issueBundle.themes.length ? issueBundle.themes : extractThemes(issueBundle.issues);
+      const scored = scoreRepo(repo, analysis);
+      const opportunity = classifyOpportunity(repo, themes, scored.score, analysis);
 
       return {
         repo,
-        issues: realIssues.slice(0, 4),
+        issues: issueBundle.issues.slice(0, 4),
         themes,
         score: scored.score,
         monthsQuiet: scored.monthsQuiet,
         maintenanceLevel: scored.maintenanceLevel,
+        analysis,
         opportunity,
-        plan: aiPlan(repo, opportunity, themes),
+        plan: aiPlan(repo, opportunity, themes, analysis),
       };
     })
   );
@@ -327,6 +558,38 @@ function Evidence({ card }) {
       <div>
         <span>Quiet for</span>
         <strong>{card.monthsQuiet} mo</strong>
+      </div>
+    </div>
+  );
+}
+
+function SignalGrid({ card }) {
+  const analysis = card.analysis || {};
+  return (
+    <div className="signalGrid">
+      <div>
+        <span>Confidence / 置信度</span>
+        <strong>{analysis.confidence ?? "n/a"}</strong>
+      </div>
+      <div>
+        <span>Demand issues / 需求型 issue</span>
+        <strong>{analysis.demandIssues ?? 0}</strong>
+      </div>
+      <div>
+        <span>Stale issues / 过期 issue</span>
+        <strong>{analysis.staleOpenIssues ?? 0}</strong>
+      </div>
+      <div>
+        <span>90d commits / 90 天提交</span>
+        <strong>{analysis.recentCommitCount ?? 0}</strong>
+      </div>
+      <div>
+        <span>Open PRs / open PR</span>
+        <strong>{analysis.openPulls ?? 0}</strong>
+      </div>
+      <div>
+        <span>Stale PRs / 过期 PR</span>
+        <strong>{analysis.stalePulls ?? 0}</strong>
       </div>
     </div>
   );
@@ -376,21 +639,41 @@ function OpportunityCard({ card }) {
         </div>
       </div>
 
+      <SignalGrid card={card} />
+
       <section>
         <h3>Why this may spread / 为什么可能传播</h3>
         <p>{card.opportunity.why}</p>
       </section>
 
       <section>
-        <h3>Repeated issue themes / issue 重复主题</h3>
-        {card.themes.length ? (
-          <div className="themes">
-            {card.themes.map((theme) => (
-              <span key={theme}>{theme}</span>
+        <h3>Risk check / 风险检查</h3>
+        <div className="riskBox">
+          <ShieldAlert size={16} />
+          <span>{card.opportunity.risk || "Needs competitor check / 需要竞品检查"}</span>
+        </div>
+        {(card.opportunity.alternatives || []).length > 0 && (
+          <div className="alternatives">
+            {card.opportunity.alternatives.map((name) => (
+              <span key={name}>{name}</span>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section>
+        <h3>Demand clusters / 需求聚类</h3>
+        {card.analysis?.clusters?.length ? (
+          <div className="clusterList">
+            {card.analysis.clusters.slice(0, 4).map((cluster) => (
+              <div key={cluster.name} className="cluster">
+                <strong>{cluster.name}</strong>
+                <span>{cluster.count} hits</span>
+              </div>
             ))}
           </div>
         ) : (
-          <p className="muted">No issue themes fetched. Add a GitHub token for deeper evidence.</p>
+          <p className="muted">No clusters found. Add a GitHub token or try a broader topic.</p>
         )}
       </section>
 
@@ -401,6 +684,7 @@ function OpportunityCard({ card }) {
             card.issues.map((issue) => (
               <a href={issue.html_url} target="_blank" rel="noreferrer" key={issue.id}>
                 <span>{issue.title}</span>
+                {issue.state === "open" && <em>open</em>}
                 <ExternalLink size={14} />
               </a>
             ))
