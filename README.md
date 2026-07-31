@@ -158,10 +158,46 @@ This is not meant to be a final investment decision. It is a fast filter for bui
 
 ## Run Locally / 本地运行
 
+For the real evidence pipeline, run the API and web app together:
+
+要使用真实证据分析链路，请同时运行 API 和网页：
+
+Terminal 1 / 终端 1:
+
+```bash
+npm run api
+```
+
+Terminal 2 / 终端 2:
+
 ```bash
 npm install
 npm run dev
 ```
+
+Optional server token / 可选服务端 token:
+
+```bash
+GITHUB_TOKEN=github_pat_xxx npm run api
+```
+
+If the API server is unavailable, the web app falls back to direct browser calls to GitHub.
+
+如果 API 服务不可用，网页会自动退回浏览器直连 GitHub。
+
+API endpoint / API 接口：
+
+```text
+GET /api/opportunities?topic=API%20testing%20tools&page=1
+```
+
+The API returns compact opportunity cards instead of raw GitHub payloads.
+
+API 返回精简机会卡，不直接返回庞大的 GitHub 原始数据。
+
+If GitHub rate limits are hit, cards are marked `Evidence limited / 证据受限` and downgraded to `Watch / 观察` unless demand evidence is available.
+
+如果触发 GitHub 限流，机会卡会标记为 `Evidence limited / 证据受限`，并在缺少需求证据时降级为 `Watch / 观察`。
 
 Open:
 

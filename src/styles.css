@@ -449,6 +449,19 @@ input {
   border-radius: 8px;
 }
 
+.limitedEvidence {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #ead6a4;
+  background: #fff7dc;
+  color: #62451c;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
 .signalGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

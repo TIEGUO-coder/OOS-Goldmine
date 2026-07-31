@@ -107,6 +107,20 @@ const STOP_WORDS = new Set([
   "project",
   "repo",
   "repository",
+  "user-images",
+  "githubusercontent",
+  "image",
+  "images",
+  "http",
+  "https",
+  "com",
+  "png",
+  "jpg",
+  "jpeg",
+  "default",
+  "info",
+  "width",
+  "src",
 ]);
 
 const DEMAND_WORDS = [
@@ -172,6 +186,8 @@ const CATEGORY_RULES = [
   },
 ];
 
+const QUERY_STOP_WORDS = new Set(["tool", "tools", "app", "apps", "project", "projects", "open", "source", "oss"]);
+
 function monthsSince(dateString) {
   if (!dateString) return 0;
   const then = new Date(dateString).getTime();
@@ -195,8 +211,51 @@ function issueText(issue) {
   return `${issue.title || ""} ${issue.body || ""} ${(issue.labels || []).map((label) => label.name).join(" ")}`.toLowerCase();
 }
 
+function slimIssue(issue) {
+  return {
+    id: issue.id,
+    number: issue.number,
+    title: issue.title,
+    html_url: issue.html_url,
+    state: issue.state,
+    comments: issue.comments || 0,
+    created_at: issue.created_at,
+    updated_at: issue.updated_at,
+    labels: (issue.labels || []).map((label) => ({ name: label.name, color: label.color })),
+  };
+}
+
 function hasAny(text, words) {
   return words.some((word) => text.includes(word));
+}
+
+function topicTerms(topic) {
+  return (
+    topic
+      .toLowerCase()
+      .match(/[a-z][a-z0-9-]{2,}/g)
+      ?.filter((word) => !QUERY_STOP_WORDS.has(word)) || []
+  );
+}
+
+function relevanceScore(repo, topic) {
+  const terms = topicTerms(topic);
+  if (!terms.length) return 1;
+  const text = `${repo.name} ${repo.full_name} ${repo.description || ""} ${(repo.topics || []).join(" ")}`.toLowerCase();
+  return terms.reduce((score, term) => score + (text.includes(term) ? 1 : 0), 0);
+}
+
+function isLikelyPersonalConfigRepo(repo) {
+  const name = (repo.name || "").toLowerCase();
+  const fullName = (repo.full_name || "").toLowerCase();
+  const description = (repo.description || "").toLowerCase();
+  return (
+    name.startsWith(".") ||
+    ["dotfiles", "config", "configs", "settings", "profile"].includes(name) ||
+    fullName.includes("/dotfiles") ||
+    description.includes("dotfiles") ||
+    description.includes("personal config")
+  );
 }
 
 function scoreRepo(repo, analysis = null) {
@@ -208,6 +267,7 @@ function scoreRepo(repo, analysis = null) {
   const demandSignal = analysis ? Math.min(18, analysis.demandIssues * 2.4 + analysis.clusterCount * 2.2) : 0;
   const staleIssueSignal = analysis ? Math.min(12, analysis.staleOpenIssues * 1.6) : 0;
   const activeMaintainerPenalty = analysis?.recentCommitCount > 8 ? 18 : analysis?.recentCommitCount > 2 ? 8 : 0;
+  const evidencePenalty = analysis?.evidenceStatus === "limited" ? 25 : 0;
   const archivedPenalty = repo.archived ? 28 : 0;
   const emptyIssuePenalty = repo.open_issues_count === 0 ? 14 : 0;
   const obsoletePenalty = analysis?.obsoleteRisk === "high" ? 18 : 0;
@@ -220,6 +280,7 @@ function scoreRepo(repo, analysis = null) {
         demandSignal +
         staleIssueSignal -
         activeMaintainerPenalty -
+        evidencePenalty -
         archivedPenalty -
         emptyIssuePenalty -
         obsoletePenalty,
@@ -287,7 +348,7 @@ function analyzeIssueClusters(issues) {
     .map(([name, count]) => ({
       name,
       count: Math.round(count),
-      examples: realIssues.filter((issue) => issueText(issue).includes(name.split(" ")[0])).slice(0, 2),
+      examples: realIssues.filter((issue) => issueText(issue).includes(name.split(" ")[0])).slice(0, 2).map(slimIssue),
     }));
 
   return {
@@ -309,6 +370,16 @@ function categoryFor(repo, themes) {
 
 function classifyOpportunity(repo, themes, score, analysis = null) {
   const category = categoryFor(repo, themes);
+  if (analysis?.evidenceStatus === "limited" && analysis.demandIssues === 0 && analysis.clusterCount === 0) {
+    return {
+      verdict: "Watch",
+      wedge: category?.wedge || "evidence-first exploration",
+      wedgeZh: category?.wedgeZh || "证据优先探索",
+      why: "GitHub 证据抓取受限，当前不能证明需求仍然活跃。先补 token 或稍后重试，再决定是否改造。",
+      alternatives: category?.alternatives || [],
+      risk: "Evidence limited / 证据受限",
+    };
+  }
   if (analysis?.obsoleteRisk === "high") {
     return {
       verdict: "Skip",
@@ -349,7 +420,7 @@ function classifyOpportunity(repo, themes, score, analysis = null) {
   };
 }
 
-function buildAnalysis(repo, issueBundle, pulls = [], commits = [], releases = []) {
+function buildAnalysis(repo, issueBundle, pulls = [], commits = [], releases = [], evidenceErrors = []) {
   const category = categoryFor(repo, issueBundle.themes);
   const recentCommitCount = commits.length;
   const staleOpenIssues = issueBundle.staleOpenItems.length;
@@ -368,7 +439,8 @@ function buildAnalysis(repo, issueBundle, pulls = [], commits = [], releases = [
       Math.min(18, clusterCount * 3) +
       Math.min(12, staleOpenIssues * 1.2) +
       (recentCommitCount === 0 ? 8 : recentCommitCount > 8 ? -12 : 0) -
-      (obsoleteRisk === "high" ? 18 : 0),
+      (obsoleteRisk === "high" ? 18 : 0) -
+      (evidenceErrors.length ? 24 : 0),
     0,
     100
   );
@@ -385,6 +457,8 @@ function buildAnalysis(repo, issueBundle, pulls = [], commits = [], releases = [
     stalePulls: stalePulls.length,
     lastRelease,
     obsoleteRisk,
+    evidenceStatus: evidenceErrors.length ? "limited" : "complete",
+    evidenceErrors,
     confidence: Math.round(confidence),
   };
 }
@@ -485,10 +559,11 @@ async function githubFetch(url, token) {
   return response.json();
 }
 
-async function safeGithubFetch(url, token, fallback) {
+async function safeGithubFetch(url, token, fallback, errors = [], label = "github") {
   try {
     return await githubFetch(url, token);
-  } catch {
+  } catch (error) {
+    errors.push({ label, message: error.message });
     return fallback;
   }
 }
@@ -496,17 +571,18 @@ async function safeGithubFetch(url, token, fallback) {
 async function fetchRepoEvidence(repo, token) {
   const base = `https://api.github.com/repos/${repo.full_name}`;
   const since = new Date(Date.now() - 1000 * 60 * 60 * 24 * 90).toISOString();
+  const errors = [];
   const [openIssues, closedIssues, openPulls, recentCommits, releases] = await Promise.all([
-    safeGithubFetch(`${base}/issues?state=open&per_page=30&sort=comments&direction=desc`, token, []),
-    safeGithubFetch(`${base}/issues?state=closed&per_page=20&sort=updated&direction=desc`, token, []),
-    safeGithubFetch(`${base}/pulls?state=open&per_page=20&sort=updated&direction=desc`, token, []),
-    safeGithubFetch(`${base}/commits?since=${encodeURIComponent(since)}&per_page=20`, token, []),
-    safeGithubFetch(`${base}/releases?per_page=5`, token, []),
+    safeGithubFetch(`${base}/issues?state=open&per_page=30&sort=comments&direction=desc`, token, [], errors, "open issues"),
+    safeGithubFetch(`${base}/issues?state=closed&per_page=20&sort=updated&direction=desc`, token, [], errors, "closed issues"),
+    safeGithubFetch(`${base}/pulls?state=open&per_page=20&sort=updated&direction=desc`, token, [], errors, "open pull requests"),
+    safeGithubFetch(`${base}/commits?since=${encodeURIComponent(since)}&per_page=20`, token, [], errors, "recent commits"),
+    safeGithubFetch(`${base}/releases?per_page=5`, token, [], errors, "recent releases"),
   ]);
 
   const allIssues = [...openIssues, ...closedIssues].filter((issue) => !issue.pull_request);
   const issueBundle = analyzeIssueClusters(allIssues);
-  const analysis = buildAnalysis(repo, issueBundle, openPulls, recentCommits, releases);
+  const analysis = buildAnalysis(repo, issueBundle, openPulls, recentCommits, releases, errors);
   return { issueBundle, analysis };
 }
 
@@ -514,7 +590,9 @@ async function findOpportunities(topic, token, page) {
   const query = encodeURIComponent(`${topic} stars:>300 archived:false pushed:<2025-01-01`);
   const searchUrl = `https://api.github.com/search/repositories?q=${query}&sort=updated&order=asc&per_page=12&page=${page}`;
   const data = await githubFetch(searchUrl, token);
-  const repos = data.items || [];
+  const repos = (data.items || [])
+    .filter((repo) => relevanceScore(repo, topic) > 0)
+    .filter((repo) => !isLikelyPersonalConfigRepo(repo));
 
   const cards = await Promise.all(
     repos.slice(0, 6).map(async (repo) => {
@@ -525,7 +603,7 @@ async function findOpportunities(topic, token, page) {
 
       return {
         repo,
-        issues: issueBundle.issues.slice(0, 4),
+        issues: issueBundle.issues.slice(0, 4).map(slimIssue),
         themes,
         score: scored.score,
         monthsQuiet: scored.monthsQuiet,
@@ -538,6 +616,19 @@ async function findOpportunities(topic, token, page) {
   );
 
   return cards.sort((a, b) => b.score - a.score).slice(0, 3);
+}
+
+async function findOpportunitiesViaServer(topic, token, page) {
+  const params = new URLSearchParams({ topic, page: String(page) });
+  const response = await fetch(`/api/opportunities?${params.toString()}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Server API failed: ${text.slice(0, 180)}`);
+  }
+  const data = await response.json();
+  return data.cards || [];
 }
 
 function Evidence({ card }) {
@@ -638,6 +729,13 @@ function OpportunityCard({ card }) {
           <strong>{card.maintenanceLevel}</strong>
         </div>
       </div>
+
+      {card.analysis?.evidenceStatus === "limited" && (
+        <div className="limitedEvidence">
+          <AlertCircle size={16} />
+          <span>Evidence limited / 证据受限：GitHub rate limit or partial fetch failure. Add a token for deeper analysis.</span>
+        </div>
+      )}
 
       <SignalGrid card={card} />
 
@@ -751,7 +849,12 @@ function App() {
     setError("");
     setPage(nextPage);
     try {
-      const results = await findOpportunities(topic.trim(), token.trim(), nextPage);
+      let results = [];
+      try {
+        results = await findOpportunitiesViaServer(topic.trim(), token.trim(), nextPage);
+      } catch {
+        results = await findOpportunities(topic.trim(), token.trim(), nextPage);
+      }
       setCards(results);
       if (!results.length) {
         setError("No strong opportunities found. Try a broader topic.");
