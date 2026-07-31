@@ -167,6 +167,14 @@ const INSTALL_WORDS = ["install", "setup", "build", "dependency", "npm", "yarn",
 
 const CATEGORY_RULES = [
   {
+    match: ["sql", "database", "postgres", "mysql", "sqlite", "sqlserver", "oracle", "migration", "migrate"],
+    wedge: "SQL migration compatibility report",
+    wedgeZh: "SQL 迁移兼容性报告",
+    risk: "High value, high correctness risk / 价值高但正确性风险高",
+    alternatives: ["SQLines", "pgloader", "Flyway", "Liquibase"],
+    why: "数据库迁移痛点明确，但完整转换器风险很高。更好的切口是兼容性扫描、迁移风险报告和 AI 修复计划。",
+  },
+  {
     match: ["api", "openapi", "postman", "rest", "graphql"],
     wedge: "API collection migration diff",
     wedgeZh: "API 集合迁移差异报告",
@@ -199,6 +207,33 @@ const CATEGORY_RULES = [
     why: "这类需求可能已经被官方调试能力覆盖，更适合做迁移指南或跳过，不适合复刻老工具。",
   },
 ];
+
+const CURATED_REPO_OVERRIDES = {
+  "brookshi/Hitchhiker": {
+    verdict: "Adapt",
+    wedge: "API collection migration diff",
+    wedgeZh: "API 集合迁移差异报告",
+    risk: "High competition / 竞争强",
+    alternatives: ["Postman", "Insomnia", "Hoppscotch", "Bruno"],
+    why: "Hitchhiker 证明 API 协作、响应对比、压测和本地部署有需求，但完整 API 客户端赛道太拥挤。推荐做迁移差异和回归风险报告。",
+  },
+  "nitin42/react-perf-devtool": {
+    verdict: "Adapt",
+    wedge: "React render regression report",
+    wedgeZh: "React 渲染回归报告",
+    risk: "Medium competition / 竞争中等",
+    alternatives: ["React DevTools Profiler", "Chrome Performance Panel", "Lighthouse"],
+    why: "React 性能痛点仍然存在，但完整 devtool 难打。推荐把 profiling 数据转成可分享的渲染回归报告和修复建议。",
+  },
+  "dmtolpeko/sqlines": {
+    verdict: "Adapt",
+    wedge: "SQL migration compatibility report",
+    wedgeZh: "SQL 迁移兼容性报告",
+    risk: "High value, high correctness risk / 价值高但正确性风险高",
+    alternatives: ["SQLines", "pgloader", "Flyway", "Liquibase"],
+    why: "数据库迁移需求强，但万能转换器风险高。推荐做兼容性扫描、方言风险报告和 AI 修复计划。",
+  },
+};
 
 const QUERY_STOP_WORDS = new Set(["tool", "tools", "app", "apps", "project", "projects", "open", "source", "oss", "developer"]);
 const TOPIC_ALIASES = {
@@ -273,8 +308,19 @@ function relevanceScore(repo, topic) {
   }, 0);
 }
 
+function hasApiTestingAnchor(repo, topic) {
+  const terms = topicTerms(topic);
+  if (!terms.includes("api") || !terms.includes("testing")) return true;
+  const strongText = `${repo.name} ${repo.full_name} ${(repo.topics || []).join(" ")}`.toLowerCase();
+  const fullText = `${strongText} ${repo.description || ""}`.toLowerCase();
+  const strongApi = ["api", "openapi", "swagger", "postman", "insomnia", "hoppscotch", "raml", "rest", "graphql"];
+  const testAnchor = ["test", "testing", "automation", "collection", "request", "response", "endpoint", "contract"];
+  return hasAny(strongText, strongApi) || (hasAny(fullText, ["openapi", "swagger", "postman", "raml", "restful", "endpoint"]) && hasAny(fullText, testAnchor));
+}
+
 function hasMinimumTopicFit(repo, topic) {
   const terms = topicTerms(topic);
+  if (!hasApiTestingAnchor(repo, topic)) return false;
   if (terms.length <= 1) return relevanceScore(repo, topic) > 0;
   return relevanceScore(repo, topic) >= Math.min(2, terms.length);
 }
@@ -402,7 +448,13 @@ function categoryFor(repo, themes) {
   return CATEGORY_RULES.find((rule) => rule.match.some((word) => text.includes(word))) || null;
 }
 
+function curatedOverrideFor(repo) {
+  return CURATED_REPO_OVERRIDES[repo.full_name] || null;
+}
+
 function classifyOpportunity(repo, themes, score, analysis = null) {
+  const override = curatedOverrideFor(repo);
+  if (override && analysis?.evidenceStatus === "complete") return override;
   const category = categoryFor(repo, themes);
   if (analysis?.evidenceStatus === "limited" && analysis.demandIssues === 0 && analysis.clusterCount === 0) {
     return {
