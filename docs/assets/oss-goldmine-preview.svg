@@ -9,13 +9,13 @@
   <text x="72" y="216" fill="#FFFAF0" font-family="Inter, Arial, sans-serif" font-size="58" font-weight="800">opportunities first.</text>
   <text x="74" y="258" fill="#D7D3C6" font-family="Inter, Arial, sans-serif" font-size="20">Demand is alive. Maintenance is fading. Ship the smallest useful wedge.</text>
   <rect x="770" y="62" width="438" height="188" rx="8" fill="#14201B" fill-opacity="0.82" stroke="#667D72"/>
-  <text x="796" y="101" fill="#D7D3C6" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="700">Topic / 方向</text>
+  <text x="796" y="101" fill="#D7D3C6" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="700">Topic</text>
   <rect x="796" y="116" width="386" height="46" rx="8" fill="#FFFAF0"/>
   <text x="816" y="145" fill="#1B251F" font-family="Inter, Arial, sans-serif" font-size="17">API testing tools</text>
   <rect x="796" y="180" width="386" height="46" rx="8" fill="#F0B84F"/>
-  <text x="908" y="209" fill="#161512" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="800">Find gold / 挖机会</text>
+  <text x="948" y="209" fill="#161512" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="800">Find gold</text>
 
-  <text x="72" y="350" fill="#18201B" font-family="Inter, Arial, sans-serif" font-size="30" font-weight="800">Opportunity cards / 机会卡</text>
+  <text x="72" y="350" fill="#18201B" font-family="Inter, Arial, sans-serif" font-size="30" font-weight="800">Opportunity cards</text>
   <text x="72" y="382" fill="#667066" font-family="Inter, Arial, sans-serif" font-size="16">Each card recommends a small wedge, not a full clone.</text>
 
   <g>
@@ -26,14 +26,14 @@
     <text x="338" y="484" fill="#6F5527" font-family="Inter, Arial, sans-serif" font-size="10" font-weight="800">Demand Gap</text>
     <text x="94" y="488" fill="#18201B" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="800">API collection</text>
     <text x="94" y="514" fill="#18201B" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="800">migration diff</text>
-    <text x="94" y="546" fill="#667066" font-family="Inter, Arial, sans-serif" font-size="15">API 集合迁移差异报告</text>
+    <text x="94" y="546" fill="#667066" font-family="Inter, Arial, sans-serif" font-size="15">Migration risk report</text>
     <rect x="94" y="576" width="80" height="28" rx="14" fill="#E8F1E9"/>
     <text x="112" y="595" fill="#315640" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="800">postman</text>
     <rect x="184" y="576" width="88" height="28" rx="14" fill="#E8F1E9"/>
     <text x="202" y="595" fill="#315640" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="800">response</text>
     <rect x="282" y="576" width="70" height="28" rx="14" fill="#E8F1E9"/>
     <text x="301" y="595" fill="#315640" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="800">stress</text>
-    <text x="94" y="630" fill="#3E4A41" font-family="Inter, Arial, sans-serif" font-size="14">Adapt / 改造 · 88 mo quiet</text>
+    <text x="94" y="630" fill="#3E4A41" font-family="Inter, Arial, sans-serif" font-size="14">Adapt · 88 mo quiet</text>
   </g>
 
   <g>
@@ -44,14 +44,14 @@
     <text x="730" y="484" fill="#6F5527" font-family="Inter, Arial, sans-serif" font-size="10" font-weight="800">Demand Gap</text>
     <text x="486" y="488" fill="#18201B" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="800">React performance</text>
     <text x="486" y="514" fill="#18201B" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="800">audit companion</text>
-    <text x="486" y="546" fill="#667066" font-family="Inter, Arial, sans-serif" font-size="15">React 性能审计配套工具</text>
+    <text x="486" y="546" fill="#667066" font-family="Inter, Arial, sans-serif" font-size="15">Render regression report</text>
     <rect x="486" y="576" width="66" height="28" rx="14" fill="#E8F1E9"/>
     <text x="504" y="595" fill="#315640" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="800">react</text>
     <rect x="562" y="576" width="68" height="28" rx="14" fill="#E8F1E9"/>
     <text x="580" y="595" fill="#315640" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="800">render</text>
     <rect x="640" y="576" width="110" height="28" rx="14" fill="#E8F1E9"/>
     <text x="658" y="595" fill="#315640" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="800">performance</text>
-    <text x="486" y="630" fill="#3E4A41" font-family="Inter, Arial, sans-serif" font-size="14">Adapt / 改造 · 43 mo quiet</text>
+    <text x="486" y="630" fill="#3E4A41" font-family="Inter, Arial, sans-serif" font-size="14">Adapt · 43 mo quiet</text>
   </g>
 
   <g>
@@ -62,14 +62,14 @@
     <text x="1122" y="484" fill="#6F5527" font-family="Inter, Arial, sans-serif" font-size="10" font-weight="800">Demand Gap</text>
     <text x="878" y="488" fill="#18201B" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="800">Evidence-first</text>
     <text x="878" y="514" fill="#18201B" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="800">skip example</text>
-    <text x="878" y="546" fill="#667066" font-family="Inter, Arial, sans-serif" font-size="15">证据优先的跳过样本</text>
+    <text x="878" y="546" fill="#667066" font-family="Inter, Arial, sans-serif" font-size="15">Legacy migration note</text>
     <rect x="878" y="576" width="82" height="28" rx="14" fill="#E8F1E9"/>
     <text x="896" y="595" fill="#315640" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="800">debugger</text>
     <rect x="970" y="576" width="72" height="28" rx="14" fill="#E8F1E9"/>
     <text x="988" y="595" fill="#315640" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="800">legacy</text>
     <rect x="1052" y="576" width="92" height="28" rx="14" fill="#E8F1E9"/>
     <text x="1070" y="595" fill="#315640" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="800">migration</text>
-    <text x="878" y="630" fill="#3E4A41" font-family="Inter, Arial, sans-serif" font-size="14">Watch / 观察 · competitor check needed</text>
+    <text x="878" y="630" fill="#3E4A41" font-family="Inter, Arial, sans-serif" font-size="14">Watch · competitor check needed</text>
   </g>
 
   <defs>

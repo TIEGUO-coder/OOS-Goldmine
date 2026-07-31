@@ -1,17 +1,17 @@
-## Summary / 总结
+## Summary
 
 -
 
-## What changed / 改了什么
+## What changed
 
 -
 
-## Evidence / 证据
+## Evidence
 
 - [ ] I ran `npm run build`
 - [ ] I tested at least one sample topic
 - [ ] I included screenshots for UI changes
 
-## Notes / 备注
+## Notes
 
 -

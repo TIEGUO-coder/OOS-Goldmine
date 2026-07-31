@@ -123,42 +123,42 @@ const CATEGORY_RULES = [
   {
     match: ["sql", "database", "postgres", "mysql", "sqlite", "sqlserver", "oracle", "migration", "migrate"],
     wedge: "SQL migration compatibility report",
-    wedgeZh: "SQL 迁移兼容性报告",
-    risk: "High value, high correctness risk / 价值高但正确性风险高",
+    wedgeZh: "SQL migration compatibility report",
+    risk: "High value, high correctness risk",
     alternatives: ["SQLines", "pgloader", "Flyway", "Liquibase"],
-    why: "数据库迁移痛点明确，但完整转换器风险很高。更好的切口是兼容性扫描、迁移风险报告和 AI 修复计划。",
+    why: "Database migration has clear business pain, but a full converter carries high correctness risk. The sharper wedge is compatibility scanning, migration risk reporting, and AI-ready fix plans.",
   },
   {
     match: ["api", "openapi", "postman", "rest", "graphql"],
     wedge: "API collection migration diff",
-    wedgeZh: "API 集合迁移差异报告",
-    risk: "High competition / 竞争强",
+    wedgeZh: "API collection migration diff",
+    risk: "High competition",
     alternatives: ["Postman", "Insomnia", "Hoppscotch", "Bruno"],
-    why: "完整 API 客户端竞争很强。更好的切口是迁移差异、响应对比、回归测试报告，而不是重做客户端。",
+    why: "The full API client market is crowded. A better wedge is migration diffs, response comparison, and regression reports instead of another client.",
   },
   {
     match: ["react", "frontend", "performance", "render", "profiler"],
     wedge: "React performance audit companion",
-    wedgeZh: "React 性能审计配套工具",
-    risk: "Medium competition / 竞争中等",
+    wedgeZh: "React performance audit companion",
+    risk: "Medium competition",
     alternatives: ["React DevTools Profiler", "Chrome Performance Panel", "Lighthouse"],
-    why: "完整 devtool 不容易打，但 issue 驱动的性能审计、迁移建议、报告生成更适合小团队。",
+    why: "A full devtool is hard to win. Issue-driven performance audits, migration suggestions, and shareable reports are a better fit for a small team.",
   },
   {
     match: ["browser", "extension", "chrome", "firefox"],
     wedge: "extension compatibility checker",
-    wedgeZh: "浏览器扩展兼容性检查器",
-    risk: "Medium competition / 竞争中等",
+    wedgeZh: "extension compatibility checker",
+    risk: "Medium competition",
     alternatives: ["Chrome Extension Manifest tools", "browser-extension-template"],
-    why: "浏览器平台变化会制造兼容性缺口，适合做迁移和检测工具，而不是重做整个扩展。",
+    why: "Browser platform changes create compatibility gaps. Migration and validation tools are more practical than rebuilding a full extension stack.",
   },
   {
     match: ["debugger", "debugging", "node-inspector"],
     wedge: "modern debugger migration guide",
-    wedgeZh: "现代调试器迁移指南",
-    risk: "Likely obsolete / 可能已被平台替代",
+    wedgeZh: "modern debugger migration guide",
+    risk: "Likely obsolete",
     alternatives: ["Chrome DevTools", "Node.js inspector", "VS Code debugger"],
-    why: "这类需求可能已经被官方调试能力覆盖，更适合做迁移指南或跳过，不适合复刻老工具。",
+    why: "The core need may already be covered by official debugging tools. This is better as a migration guide or skip decision than a rebuilt product.",
   },
 ];
 
@@ -166,26 +166,26 @@ const CURATED_REPO_OVERRIDES = {
   "brookshi/Hitchhiker": {
     verdict: "Adapt",
     wedge: "API collection migration diff",
-    wedgeZh: "API 集合迁移差异报告",
-    risk: "High competition / 竞争强",
+    wedgeZh: "API collection migration diff",
+    risk: "High competition",
     alternatives: ["Postman", "Insomnia", "Hoppscotch", "Bruno"],
-    why: "Hitchhiker 证明 API 协作、响应对比、压测和本地部署有需求，但完整 API 客户端赛道太拥挤。推荐做迁移差异和回归风险报告。",
+    why: "Hitchhiker proves demand around API collaboration, response comparison, stress testing, and self-hosting, but the full API client market is crowded. Build migration diffs and regression risk reports instead.",
   },
   "nitin42/react-perf-devtool": {
     verdict: "Adapt",
     wedge: "React render regression report",
-    wedgeZh: "React 渲染回归报告",
-    risk: "Medium competition / 竞争中等",
+    wedgeZh: "React render regression report",
+    risk: "Medium competition",
     alternatives: ["React DevTools Profiler", "Chrome Performance Panel", "Lighthouse"],
-    why: "React 性能痛点仍然存在，但完整 devtool 难打。推荐把 profiling 数据转成可分享的渲染回归报告和修复建议。",
+    why: "React performance pain is still real, but a full devtool is hard to win. Turn profiling data into shareable render regression reports and fix suggestions.",
   },
   "dmtolpeko/sqlines": {
     verdict: "Adapt",
     wedge: "SQL migration compatibility report",
-    wedgeZh: "SQL 迁移兼容性报告",
-    risk: "High value, high correctness risk / 价值高但正确性风险高",
+    wedgeZh: "SQL migration compatibility report",
+    risk: "High value, high correctness risk",
     alternatives: ["SQLines", "pgloader", "Flyway", "Liquibase"],
-    why: "数据库迁移需求强，但万能转换器风险高。推荐做兼容性扫描、方言风险报告和 AI 修复计划。",
+    why: "Database migration demand is strong, but a universal converter is risky. Build compatibility scanning, dialect risk reports, and AI-ready fix plans.",
   },
 };
 
@@ -487,20 +487,20 @@ function classifyOpportunity(repo, themes, score, analysis) {
     return {
       verdict: "Watch",
       wedge: category?.wedge || "evidence-first exploration",
-      wedgeZh: category?.wedgeZh || "证据优先探索",
-      why: "GitHub 证据抓取受限，当前不能证明需求仍然活跃。先补 token 或稍后重试，再决定是否改造。",
+      wedgeZh: category?.wedgeZh || "evidence-first exploration",
+      why: "GitHub evidence is limited, so the current run cannot prove active demand. Add a token or retry later before deciding to adapt it.",
       alternatives: category?.alternatives || [],
-      risk: "Evidence limited / 证据受限",
+      risk: "Evidence limited",
     };
   }
   if (analysis.obsoleteRisk === "high") {
     return {
       verdict: "Skip",
       wedge: category?.wedge || "migration note, not a product",
-      wedgeZh: category?.wedgeZh || "迁移说明，不建议做产品",
-      why: "维护缺口很明显，但平台或成熟替代品可能已经解决核心需求。更适合写迁移指南或跳过。",
+      wedgeZh: category?.wedgeZh || "migration note, not a product",
+      why: "The maintenance gap is visible, but platforms or mature alternatives may already cover the core need. Treat this as a migration guide or skip decision.",
       alternatives: category?.alternatives || [],
-      risk: category?.risk || "Likely obsolete / 可能过时",
+      risk: category?.risk || "Likely obsolete",
     };
   }
   if (category) {
@@ -517,19 +517,19 @@ function classifyOpportunity(repo, themes, score, analysis) {
     return {
       verdict: "Adapt",
       wedge: "narrow companion tool",
-      wedgeZh: "窄切口配套工具",
-      why: "需求和维护缺口都明显，但建议先做周边小工具，避免复刻整个项目。",
+      wedgeZh: "narrow companion tool",
+      why: "Demand and maintenance gaps are visible. Start with a narrow companion tool instead of cloning the original project.",
       alternatives: [],
-      risk: "Needs competitor check / 需要竞品检查",
+      risk: "Needs competitor check",
     };
   }
   return {
     verdict: "Watch",
     wedge: "evidence-first exploration",
-    wedgeZh: "证据优先探索",
-    why: "信号还不够强，应该先看 issue 聚类和替代品，再决定是否开工。",
+    wedgeZh: "evidence-first exploration",
+    why: "The signal is not strong enough yet. Review issue clusters and alternatives before building.",
     alternatives: [],
-    risk: "Low confidence / 低置信度",
+    risk: "Low confidence",
   };
 }
 
