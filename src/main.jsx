@@ -551,10 +551,13 @@ function buildAnalysis(repo, issueBundle, pulls = [], commits = [], releases = [
 
 function aiPlan(repo, opportunity, themes, analysis = null) {
   const themeLine = themes.length ? themes.join(", ") : "open issues, stale requests, migration pain";
+  const positioning = opportunity.wedgeZh && opportunity.wedgeZh !== opportunity.wedge
+    ? `${opportunity.wedge} (${opportunity.wedgeZh})`
+    : opportunity.wedge;
   return `Build brief for ${repo.full_name}
 
 Positioning:
-Create a ${opportunity.wedge} (${opportunity.wedgeZh}) inspired by unmet demand around ${repo.name}.
+Create a ${positioning} inspired by unmet demand around ${repo.name}.
 
 Evidence to inspect:
 - GitHub repo: ${repo.html_url}
@@ -706,7 +709,8 @@ async function findOpportunities(topic, token, page) {
 
 async function findOpportunitiesViaServer(topic, token, page) {
   const params = new URLSearchParams({ topic, page: String(page) });
-  const response = await fetch(`/api/opportunities?${params.toString()}`, {
+  const apiBase = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
+  const response = await fetch(`${apiBase}/api/opportunities?${params.toString()}`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
   if (!response.ok) {
@@ -793,7 +797,9 @@ function OpportunityCard({ card }) {
             {card.sample && <span className="sampleBadge">sample</span>}
           </div>
           <h2>{card.opportunity.wedge}</h2>
-          <p>{card.opportunity.wedgeZh}</p>
+          {card.opportunity.wedgeZh && card.opportunity.wedgeZh !== card.opportunity.wedge && (
+            <p>{card.opportunity.wedgeZh}</p>
+          )}
         </div>
         <div className="score">
           <span>{card.score}</span>

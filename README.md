@@ -152,15 +152,37 @@ Then edit `.env`:
 ```bash
 GITHUB_TOKEN=your_read_only_github_token
 PORT=8787
+VITE_API_BASE_URL=
 ```
 
 `.env` is ignored by git and should never be committed.
+
+For a deployed frontend, set `VITE_API_BASE_URL` to the public API origin, for example:
+
+```bash
+VITE_API_BASE_URL=https://oss-goldmine-api.onrender.com
+```
 
 API endpoint:
 
 ```text
 GET /api/opportunities?topic=API%20testing%20tools&page=1
 ```
+
+## Deploy the API
+
+GitHub Pages can host the static app, but it cannot run the Node API. For reliable public search, deploy the API separately.
+
+This repo includes `render.yaml` for Render:
+
+1. Create a new Render Blueprint from this repository.
+2. Set `GITHUB_TOKEN` as a secret environment variable.
+3. Deploy the `oss-goldmine-api` web service.
+4. Confirm `https://your-api-host/health` returns `{"ok":true}`.
+5. Add a GitHub repository variable named `VITE_API_BASE_URL` with the API origin.
+6. Re-run the GitHub Pages workflow.
+
+Without `VITE_API_BASE_URL`, the app tries `/api/opportunities` on the current origin and then falls back to direct browser GitHub requests.
 
 ## GitHub Token
 

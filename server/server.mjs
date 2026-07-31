@@ -534,10 +534,13 @@ function classifyOpportunity(repo, themes, score, analysis) {
 }
 
 function aiPlan(repo, opportunity, themes, analysis) {
+  const positioning = opportunity.wedgeZh && opportunity.wedgeZh !== opportunity.wedge
+    ? `${opportunity.wedge} (${opportunity.wedgeZh})`
+    : opportunity.wedge;
   return `Build brief for ${repo.full_name}
 
 Positioning:
-Create a ${opportunity.wedge} (${opportunity.wedgeZh}) inspired by unmet demand around ${repo.name}.
+Create a ${positioning} inspired by unmet demand around ${repo.name}.
 
 Evidence to inspect:
 - GitHub repo: ${repo.html_url}

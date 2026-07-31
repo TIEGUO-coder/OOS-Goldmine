@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: oss-goldmine-api
+    runtime: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm run api
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: GITHUB_TOKEN
+        sync: false

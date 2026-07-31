@@ -58,6 +58,39 @@ Expected demo URL:
 https://tieguo-coder.github.io/OOS-Goldmine/
 ```
 
+## Public API
+
+GitHub Pages only serves static files. Deploy the Node API separately before public launch.
+
+Recommended path:
+
+```text
+Render -> New -> Blueprint -> connect this repository
+```
+
+This repository includes:
+
+```text
+render.yaml
+```
+
+After Render creates the service:
+
+1. Add `GITHUB_TOKEN` as a secret environment variable in Render.
+2. Open `https://your-api-host/health`.
+3. Confirm it returns `{"ok":true}`.
+4. Copy the API origin, for example `https://oss-goldmine-api.onrender.com`.
+
+Then add a GitHub repository variable:
+
+```text
+Settings -> Secrets and variables -> Actions -> Variables -> New repository variable
+Name: VITE_API_BASE_URL
+Value: https://your-api-host
+```
+
+Re-run the `Build and Publish Demo` workflow after setting the variable.
+
 ## Social Preview
 
 Go to:
@@ -92,6 +125,8 @@ launch
 
 - [ ] README preview image renders
 - [ ] Live demo opens
+- [ ] Public API `/health` returns `{"ok":true}`
+- [ ] `VITE_API_BASE_URL` repository variable is set
 - [ ] About description is filled
 - [ ] Topics are added
 - [ ] Issue templates appear when opening a new issue
