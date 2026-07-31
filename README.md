@@ -181,6 +181,27 @@ Optional server token / 可选服务端 token:
 GITHUB_TOKEN=github_pat_xxx npm run api
 ```
 
+Or create a local `.env` file:
+
+或者创建本地 `.env` 文件：
+
+```bash
+cp .env.example .env
+```
+
+Then edit `.env`:
+
+然后编辑 `.env`：
+
+```text
+GITHUB_TOKEN=github_pat_xxx
+PORT=8787
+```
+
+`.env` is ignored by git and should never be committed.
+
+`.env` 已经被 git 忽略，不应该提交。
+
 If the API server is unavailable, the web app falls back to direct browser calls to GitHub.
 
 如果 API 服务不可用，网页会自动退回浏览器直连 GitHub。
