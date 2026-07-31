@@ -1,0 +1,43 @@
+name: Opportunity card
+description: Suggest a GitHub repository that may contain a buildable OSS opportunity.
+title: "[Opportunity]: "
+labels: ["opportunity"]
+body:
+  - type: input
+    id: repo
+    attributes:
+      label: GitHub repository
+      description: Paste the repository URL.
+      placeholder: https://github.com/owner/repo
+    validations:
+      required: true
+  - type: textarea
+    id: demand
+    attributes:
+      label: Why demand may still be alive
+      description: Link issues, discussions, forks, stars, or real user complaints.
+      placeholder: "Example: open issues repeatedly mention migration, API compatibility, or missing integrations."
+    validations:
+      required: true
+  - type: textarea
+    id: maintenance
+    attributes:
+      label: Why maintenance may be fading
+      description: Mention last push, unanswered issues, stale PRs, or maintainer notes.
+    validations:
+      required: true
+  - type: textarea
+    id: wedge
+    attributes:
+      label: Smallest useful wedge
+      description: What should a builder make instead of cloning the whole project?
+      placeholder: "Example: API collection migration diff instead of a full API client."
+    validations:
+      required: false
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Existing alternatives
+      description: Name tools that already solve part of the problem.
+    validations:
+      required: false

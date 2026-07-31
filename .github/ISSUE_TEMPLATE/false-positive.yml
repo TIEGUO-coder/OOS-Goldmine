@@ -1,0 +1,26 @@
+name: False positive
+description: Report an opportunity card that should probably be skipped.
+title: "[False positive]: "
+labels: ["false-positive"]
+body:
+  - type: input
+    id: repo
+    attributes:
+      label: GitHub repository
+      placeholder: https://github.com/owner/repo
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why this is not a good opportunity
+      description: Explain whether the need is obsolete, already solved, legally risky, or too broad.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Link alternatives, official docs, maintainer notes, or market changes.
+    validations:
+      required: false

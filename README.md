@@ -194,6 +194,22 @@ See [ROADMAP.md](./ROADMAP.md).
 
 查看 [ROADMAP.md](./ROADMAP.md)。
 
+## Contributing / 贡献
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md).
+
+查看 [CONTRIBUTING.md](./CONTRIBUTING.md)。
+
+You can open an issue to suggest an opportunity card or report a false positive.
+
+你可以提交 issue 来建议一张机会卡，或者反馈误判案例。
+
+## Launch Copy / 发布文案
+
+See [LAUNCH.md](./LAUNCH.md).
+
+查看 [LAUNCH.md](./LAUNCH.md)。
+
 ## License / 许可证
 
 MIT
