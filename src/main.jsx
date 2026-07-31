@@ -418,6 +418,35 @@ function OpportunityCard({ card }) {
   );
 }
 
+function ScoreMethod() {
+  return (
+    <section className="scoreMethod">
+      <div>
+        <span className="eyebrow">Scoring model / 评分模型</span>
+        <h2>Demand Gap Score is transparent by design.</h2>
+        <p>
+          The score is a practical signal, not a magic verdict. It rewards visible demand and penalizes weak evidence.
+        </p>
+      </div>
+      <div className="formula">
+        <code>stars + open issues + quiet months + forks - penalties</code>
+        <div className="formulaGrid">
+          <span>Stars / star 数</span>
+          <strong>historical demand / 历史需求</strong>
+          <span>Open issues / open issue 数</span>
+          <strong>unresolved demand / 未解决需求</strong>
+          <span>Quiet months / 静默月份</span>
+          <strong>maintenance gap / 维护缺口</strong>
+          <span>Forks / fork 数</span>
+          <strong>revival interest / 接手兴趣</strong>
+          <span>Penalties / 扣分项</span>
+          <strong>archived or no issues / 已归档或无 issue</strong>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function App() {
   const [topic, setTopic] = useState("API testing tools");
   const [token, setToken] = useState("");
@@ -541,6 +570,8 @@ function App() {
             <p>Search a builder topic to generate three opportunity cards.</p>
           </div>
         )}
+
+        <ScoreMethod />
       </section>
     </main>
   );

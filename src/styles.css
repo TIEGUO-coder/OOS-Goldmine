@@ -223,6 +223,83 @@ input {
   color: #667066;
 }
 
+.scoreMethod {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(320px, 1fr);
+  gap: 20px;
+  align-items: start;
+  margin-top: 26px;
+  padding: 24px;
+  border: 1px solid #ddd6c7;
+  background: #fffdf7;
+  border-radius: 8px;
+}
+
+.eyebrow {
+  display: inline-block;
+  margin-bottom: 10px;
+  color: #416252;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.scoreMethod h2 {
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.15;
+}
+
+.scoreMethod p {
+  margin: 12px 0 0;
+  color: #667066;
+  line-height: 1.6;
+}
+
+.formula {
+  display: grid;
+  gap: 14px;
+}
+
+.formula code {
+  display: block;
+  padding: 14px;
+  background: #18201b;
+  color: #fffaf0;
+  border-radius: 8px;
+  white-space: normal;
+  line-height: 1.5;
+}
+
+.formulaGrid {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.7fr) minmax(0, 1fr);
+  border: 1px solid #e4ddcf;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.formulaGrid span,
+.formulaGrid strong {
+  padding: 11px 12px;
+  border-bottom: 1px solid #e4ddcf;
+  font-size: 13px;
+}
+
+.formulaGrid span {
+  background: #faf7ee;
+  color: #6f786f;
+}
+
+.formulaGrid strong {
+  color: #26342b;
+}
+
+.formulaGrid span:nth-last-child(2),
+.formulaGrid strong:last-child {
+  border-bottom: 0;
+}
+
 .cards {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -422,7 +499,8 @@ input {
 
 @media (max-width: 980px) {
   .heroGrid,
-  .cards {
+  .cards,
+  .scoreMethod {
     grid-template-columns: 1fr;
   }
 

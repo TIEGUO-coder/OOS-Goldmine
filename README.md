@@ -8,6 +8,8 @@
 ![License](https://img.shields.io/badge/license-MIT-315640)
 ![GitHub only](https://img.shields.io/badge/source-GitHub-18201b)
 
+![OSS Goldmine preview](./docs/assets/oss-goldmine-preview.svg)
+
 OSS Goldmine is not another abandoned repo list.
 
 开源金矿不是又一个“废弃仓库列表”。
@@ -79,6 +81,51 @@ OSS Goldmine goes one step further:
 3. Score demand gap / 计算需求缺口
 4. Classify the opportunity / 判断机会类型
 5. Generate an AI-ready build brief / 生成 AI 可开工的构建简报
+
+## Demand Gap Score / 需求缺口分
+
+The score is intentionally simple and transparent:
+
+这个分数故意保持简单、透明：
+
+```text
+Demand Gap Score =
+  stars
+  + open issues
+  + quiet months
+  + forks
+  - penalties
+```
+
+Current MVP formula:
+
+当前 MVP 公式：
+
+```text
+score =
+  min(30, log10(stars + 1) * 9)
+  + min(30, log2(open issues + 1) * 5)
+  + min(25, quiet months * 1.35)
+  + min(15, log10(forks + 1) * 6)
+  - archived penalty
+  - empty issue penalty
+```
+
+What each signal means:
+
+每个信号的含义：
+
+| Signal / 信号 | Meaning / 含义 |
+| --- | --- |
+| Stars / star 数 | Historical demand and attention / 历史需求和关注度 |
+| Open issues / open issue 数 | Unresolved demand / 尚未解决的需求 |
+| Quiet months / 静默月份 | Maintenance gap / 维护缺口 |
+| Forks / fork 数 | Revival or adaptation interest / 接手或改造兴趣 |
+| Penalties / 扣分项 | Archived repos or weak issue evidence / 已归档仓库或 issue 证据弱 |
+
+This is not meant to be a final investment decision. It is a fast filter for builders.
+
+它不是最终投资判断，而是给 builder 用的快速筛选器。
 
 ## Run Locally / 本地运行
 
