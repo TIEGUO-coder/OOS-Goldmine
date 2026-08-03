@@ -234,13 +234,20 @@ function issueText(issue) {
   return `${issue.title || ""} ${issue.body || ""} ${(issue.labels || []).map((label) => label.name).join(" ")}`.toLowerCase();
 }
 
+function publicDescription(description) {
+  if (!description) return "";
+  if (!/[\u3400-\u9fff]/.test(description)) return description;
+  const ascii = description.replace(/[^\x20-\x7E]+/g, " ").replace(/\s+/g, " ").trim();
+  return ascii.length >= 40 ? ascii.slice(0, 280) : "Repository description contains non-English text.";
+}
+
 function slimRepo(repo) {
   return {
     id: repo.id,
     name: repo.name,
     full_name: repo.full_name,
     html_url: repo.html_url,
-    description: repo.description,
+    description: publicDescription(repo.description),
     stargazers_count: repo.stargazers_count,
     forks_count: repo.forks_count,
     open_issues_count: repo.open_issues_count,
@@ -325,8 +332,9 @@ function hasApiTestingAnchor(repo, topic) {
   const strongText = `${repo.name} ${repo.full_name} ${(repo.topics || []).join(" ")}`.toLowerCase();
   const fullText = `${strongText} ${repo.description || ""}`.toLowerCase();
   const strongApi = ["api", "openapi", "swagger", "postman", "insomnia", "hoppscotch", "raml", "rest", "graphql"];
-  const testAnchor = ["test", "testing", "automation", "collection", "request", "response", "endpoint", "contract"];
-  return hasAny(strongText, strongApi) || (hasAny(fullText, ["openapi", "swagger", "postman", "raml", "restful", "endpoint"]) && hasAny(fullText, testAnchor));
+  const strongTesting = ["api-testing", "testing-tools", "test-automation", "contract-testing", "api-client", "rest-client"];
+  const phraseAnchors = ["api test", "api testing", "rest api test", "restful api test", "openapi", "swagger", "postman", "raml"];
+  return (hasAny(strongText, strongApi) && hasAny(strongText, ["test", "testing", "automation", "client"])) || hasAny(strongText, strongTesting) || hasAny(fullText, phraseAnchors);
 }
 
 function hasMinimumTopicFit(repo, topic) {
@@ -444,6 +452,53 @@ function buildAnalysis(repo, issueBundle, pulls = [], commits = [], releases = [
     evidenceStatus: evidenceErrors.length ? "limited" : "complete",
     evidenceErrors,
     confidence: Math.round(confidence),
+  };
+}
+
+function isLikelyNonDeveloperToolRepo(repo) {
+  const name = (repo.name || "").toLowerCase();
+  const fullName = (repo.full_name || "").toLowerCase();
+  const description = repo.description || "";
+  const topics = (repo.topics || []).join(" ").toLowerCase();
+  const text = `${name} ${fullName} ${description} ${topics}`.toLowerCase();
+  const political = ["politics", "propaganda", "dictatorship", "censorship", "human-rights", "tiananmen", "xinjiang"];
+  const hanCount = (description.match(/[\u3400-\u9fff]/g) || []).length;
+  const heavyNonEnglishDescription = description.length > 120 && hanCount / description.length > 0.08;
+  const developerAnchors = [
+    "api",
+    "testing",
+    "developer",
+    "database",
+    "migration",
+    "react",
+    "performance",
+    "browser",
+    "extension",
+    "openapi",
+    "cli",
+    "devtool",
+  ];
+  return hasAny(text, political) || (heavyNonEnglishDescription && !hasAny(topics, developerAnchors));
+}
+
+function displayIssues(issues) {
+  const english = issues.filter((issue) => !/[\u3400-\u9fff]/.test(issue.title || ""));
+  return english.slice(0, 4).map(slimIssue);
+}
+
+function publicClusters(clusters) {
+  return (clusters || [])
+    .filter((cluster) => !/[\u3400-\u9fff]/.test(cluster.name || ""))
+    .map((cluster) => ({
+      ...cluster,
+      examples: displayIssues(cluster.examples || []),
+    }));
+}
+
+function publicAnalysis(analysis) {
+  return {
+    ...analysis,
+    clusters: publicClusters(analysis.clusters),
   };
 }
 
@@ -643,6 +698,7 @@ async function findOpportunities(topic, page, token) {
   const candidates = (data.items || [])
     .filter((repo) => hasMinimumTopicFit(repo, topic))
     .filter((repo) => !isLikelyPersonalConfigRepo(repo))
+    .filter((repo) => !isLikelyNonDeveloperToolRepo(repo))
     .slice(0, 8);
 
   const cards = await Promise.all(
@@ -653,12 +709,12 @@ async function findOpportunities(topic, page, token) {
       const opportunity = classifyOpportunity(repo, themes, scored.score, analysis);
       return {
         repo: slimRepo(repo),
-        issues: issueBundle.issues.slice(0, 4).map(slimIssue),
+        issues: displayIssues(issueBundle.issues),
         themes,
         score: scored.score,
         monthsQuiet: scored.monthsQuiet,
         maintenanceLevel: scored.maintenanceLevel,
-        analysis,
+        analysis: publicAnalysis(analysis),
         opportunity,
         plan: aiPlan(repo, opportunity, themes, analysis),
       };
