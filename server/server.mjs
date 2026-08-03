@@ -286,8 +286,8 @@ function hasAny(text, words) {
   return words.some((word) => text.includes(word));
 }
 
-async function githubFetch(url, userToken = "") {
-  const token = userToken || GITHUB_TOKEN;
+async function githubFetch(url) {
+  const token = GITHUB_TOKEN;
   const response = await fetch(url, {
     headers: token
       ? { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" }
@@ -300,9 +300,9 @@ async function githubFetch(url, userToken = "") {
   return response.json();
 }
 
-async function safeGithubFetch(url, token, fallback, errors, label) {
+async function safeGithubFetch(url, fallback, errors, label) {
   try {
-    return await githubFetch(url, token);
+    return await githubFetch(url);
   } catch (error) {
     errors.push({ label, message: error.message });
     return fallback;
@@ -584,7 +584,7 @@ function classifyOpportunity(repo, themes, score, analysis) {
       ...opportunityType,
       wedge: category?.wedge || "evidence-first exploration",
       wedgeZh: category?.wedgeZh || "evidence-first exploration",
-      why: "GitHub evidence is limited, so the current run cannot prove active demand. Add a token or retry later before deciding to adapt it.",
+      why: "GitHub evidence is limited, so the current run cannot prove active demand. Retry later or use a server token before deciding to adapt it.",
       alternatives: category?.alternatives || [],
       risk: "Evidence limited",
     };
@@ -671,16 +671,16 @@ Launch angle:
 "Stop guessing what to build. Find the smallest useful wedge inside real open-source demand."`;
 }
 
-async function fetchRepoEvidence(repo, token) {
+async function fetchRepoEvidence(repo) {
   const base = `https://api.github.com/repos/${repo.full_name}`;
   const since = new Date(Date.now() - 1000 * 60 * 60 * 24 * 90).toISOString();
   const errors = [];
   const [openIssues, closedIssues, openPulls, recentCommits, releases] = await Promise.all([
-    safeGithubFetch(`${base}/issues?state=open&per_page=30&sort=comments&direction=desc`, token, [], errors, "open issues"),
-    safeGithubFetch(`${base}/issues?state=closed&per_page=20&sort=updated&direction=desc`, token, [], errors, "closed issues"),
-    safeGithubFetch(`${base}/pulls?state=open&per_page=20&sort=updated&direction=desc`, token, [], errors, "open pull requests"),
-    safeGithubFetch(`${base}/commits?since=${encodeURIComponent(since)}&per_page=20`, token, [], errors, "recent commits"),
-    safeGithubFetch(`${base}/releases?per_page=5`, token, [], errors, "recent releases"),
+    safeGithubFetch(`${base}/issues?state=open&per_page=30&sort=comments&direction=desc`, [], errors, "open issues"),
+    safeGithubFetch(`${base}/issues?state=closed&per_page=20&sort=updated&direction=desc`, [], errors, "closed issues"),
+    safeGithubFetch(`${base}/pulls?state=open&per_page=20&sort=updated&direction=desc`, [], errors, "open pull requests"),
+    safeGithubFetch(`${base}/commits?since=${encodeURIComponent(since)}&per_page=20`, [], errors, "recent commits"),
+    safeGithubFetch(`${base}/releases?per_page=5`, [], errors, "recent releases"),
   ]);
 
   const issueBundle = analyzeIssueClusters([...openIssues, ...closedIssues].filter((issue) => !issue.pull_request));
@@ -688,11 +688,10 @@ async function fetchRepoEvidence(repo, token) {
   return { issueBundle, analysis };
 }
 
-async function findOpportunities(topic, page, token) {
+async function findOpportunities(topic, page) {
   const query = encodeURIComponent(`${topic} stars:>300 archived:false`);
   const data = await githubFetch(
-    `https://api.github.com/search/repositories?q=${query}&sort=stars&order=desc&per_page=16&page=${page}`,
-    token
+    `https://api.github.com/search/repositories?q=${query}&sort=stars&order=desc&per_page=16&page=${page}`
   );
 
   const candidates = (data.items || [])
@@ -703,7 +702,7 @@ async function findOpportunities(topic, page, token) {
 
   const cards = await Promise.all(
     candidates.map(async (repo) => {
-      const { issueBundle, analysis } = await fetchRepoEvidence(repo, token);
+      const { issueBundle, analysis } = await fetchRepoEvidence(repo);
       const themes = issueBundle.themes;
       const scored = scoreRepo(repo, analysis);
       const opportunity = classifyOpportunity(repo, themes, scored.score, analysis);
@@ -745,25 +744,23 @@ const server = http.createServer(async (req, res) => {
 
   const topic = (url.searchParams.get("topic") || "").trim();
   const page = Math.max(1, Number(url.searchParams.get("page") || 1));
-  const userToken = (req.headers.authorization || "").replace(/^Bearer\s+/i, "").trim();
-
   if (topic.length < 2) {
     json(res, 400, { error: "topic is required" });
     return;
   }
 
   try {
-    const cards = await findOpportunities(topic, page, userToken);
+    const cards = await findOpportunities(topic, page);
     json(res, 200, {
       cards,
       source: "server",
       page,
-      tokenMode: userToken ? "user" : GITHUB_TOKEN ? "server" : "anonymous",
+      tokenMode: GITHUB_TOKEN ? "server" : "anonymous",
     });
   } catch (error) {
     json(res, 500, {
       error: error.message,
-      hint: "Set GITHUB_TOKEN for higher GitHub API limits, or pass a read-only token from the UI.",
+      hint: "Set GITHUB_TOKEN on the server for higher GitHub API limits.",
     });
   }
 });

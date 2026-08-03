@@ -199,18 +199,18 @@ Without `VITE_API_BASE_URL`, the app tries `/api/opportunities` on the current o
 
 ## GitHub Token
 
-A GitHub token is optional.
+Users do not need to enter a GitHub token in the web UI.
 
-Without a token, the app still works, but anonymous GitHub API limits are easy to hit. A read-only token makes search more stable.
+For the hosted API, set `GITHUB_TOKEN` as a server environment variable. Without a server token, the app still works, but anonymous GitHub API limits are easy to hit.
 
-Never paste a personal token into public screenshots, issues, or pull requests.
+Never paste a personal token into public screenshots, issues, pull requests, or client-side code.
 
 ## V1 Scope
 
 - GitHub only
 - No login
 - No database
-- Optional read-only token
+- Server-side GitHub token only
 - Web demo first
 - Respect maintainers
 

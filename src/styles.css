@@ -117,13 +117,6 @@ input {
   color: #1b251f;
 }
 
-.tokenInput {
-  min-height: 46px;
-  padding: 0 12px;
-  background: #fffaf0;
-  border-radius: 8px;
-}
-
 .primaryButton,
 .secondaryButton,
 .chips button {

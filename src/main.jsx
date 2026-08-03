@@ -564,7 +564,7 @@ function classifyOpportunity(repo, themes, score, analysis = null) {
       ...opportunityType,
       wedge: category?.wedge || "evidence-first exploration",
       wedgeZh: category?.wedgeZh || "evidence-first exploration",
-      why: "GitHub evidence is limited, so the current run cannot prove active demand. Add a token or retry later before deciding to adapt it.",
+      why: "GitHub evidence is limited, so the current run cannot prove active demand. Retry later or use the server API before deciding to adapt it.",
       alternatives: category?.alternatives || [],
       risk: "Evidence limited",
     };
@@ -740,14 +740,9 @@ function demoCards() {
   });
 }
 
-async function githubFetch(url, token) {
+async function githubFetch(url) {
   const response = await fetch(url, {
-    headers: token
-      ? {
-          Authorization: `Bearer ${token}`,
-          Accept: "application/vnd.github+json",
-        }
-      : { Accept: "application/vnd.github+json" },
+    headers: { Accept: "application/vnd.github+json" },
   });
   if (!response.ok) {
     const text = await response.text();
@@ -756,25 +751,25 @@ async function githubFetch(url, token) {
   return response.json();
 }
 
-async function safeGithubFetch(url, token, fallback, errors = [], label = "github") {
+async function safeGithubFetch(url, fallback, errors = [], label = "github") {
   try {
-    return await githubFetch(url, token);
+    return await githubFetch(url);
   } catch (error) {
     errors.push({ label, message: error.message });
     return fallback;
   }
 }
 
-async function fetchRepoEvidence(repo, token) {
+async function fetchRepoEvidence(repo) {
   const base = `https://api.github.com/repos/${repo.full_name}`;
   const since = new Date(Date.now() - 1000 * 60 * 60 * 24 * 90).toISOString();
   const errors = [];
   const [openIssues, closedIssues, openPulls, recentCommits, releases] = await Promise.all([
-    safeGithubFetch(`${base}/issues?state=open&per_page=30&sort=comments&direction=desc`, token, [], errors, "open issues"),
-    safeGithubFetch(`${base}/issues?state=closed&per_page=20&sort=updated&direction=desc`, token, [], errors, "closed issues"),
-    safeGithubFetch(`${base}/pulls?state=open&per_page=20&sort=updated&direction=desc`, token, [], errors, "open pull requests"),
-    safeGithubFetch(`${base}/commits?since=${encodeURIComponent(since)}&per_page=20`, token, [], errors, "recent commits"),
-    safeGithubFetch(`${base}/releases?per_page=5`, token, [], errors, "recent releases"),
+    safeGithubFetch(`${base}/issues?state=open&per_page=30&sort=comments&direction=desc`, [], errors, "open issues"),
+    safeGithubFetch(`${base}/issues?state=closed&per_page=20&sort=updated&direction=desc`, [], errors, "closed issues"),
+    safeGithubFetch(`${base}/pulls?state=open&per_page=20&sort=updated&direction=desc`, [], errors, "open pull requests"),
+    safeGithubFetch(`${base}/commits?since=${encodeURIComponent(since)}&per_page=20`, [], errors, "recent commits"),
+    safeGithubFetch(`${base}/releases?per_page=5`, [], errors, "recent releases"),
   ]);
 
   const allIssues = [...openIssues, ...closedIssues].filter((issue) => !issue.pull_request);
@@ -783,10 +778,10 @@ async function fetchRepoEvidence(repo, token) {
   return { issueBundle, analysis };
 }
 
-async function findOpportunities(topic, token, page) {
+async function findOpportunities(topic, page) {
   const query = encodeURIComponent(`${topic} stars:>300 archived:false`);
   const searchUrl = `https://api.github.com/search/repositories?q=${query}&sort=stars&order=desc&per_page=16&page=${page}`;
-  const data = await githubFetch(searchUrl, token);
+  const data = await githubFetch(searchUrl);
   const repos = (data.items || [])
     .filter((repo) => hasMinimumTopicFit(repo, topic))
     .filter((repo) => !isLikelyPersonalConfigRepo(repo))
@@ -794,7 +789,7 @@ async function findOpportunities(topic, token, page) {
 
   const cards = await Promise.all(
     repos.slice(0, 8).map(async (repo) => {
-      const { issueBundle, analysis } = await fetchRepoEvidence(repo, token);
+      const { issueBundle, analysis } = await fetchRepoEvidence(repo);
       const themes = issueBundle.themes.length ? issueBundle.themes : extractThemes(issueBundle.issues);
       const scored = scoreRepo(repo, analysis);
       const opportunity = classifyOpportunity(repo, themes, scored.score, analysis);
@@ -819,12 +814,10 @@ async function findOpportunities(topic, token, page) {
     .slice(0, 3);
 }
 
-async function findOpportunitiesViaServer(topic, token, page) {
+async function findOpportunitiesViaServer(topic, page) {
   const params = new URLSearchParams({ topic, page: String(page) });
   const apiBase = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
-  const response = await fetch(`${apiBase}/api/opportunities?${params.toString()}`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
+  const response = await fetch(`${apiBase}/api/opportunities?${params.toString()}`);
   if (!response.ok) {
     const text = await response.text();
     throw new Error(`Server API failed: ${text.slice(0, 180)}`);
@@ -944,7 +937,7 @@ function OpportunityCard({ card }) {
       {card.analysis?.evidenceStatus === "limited" && (
         <div className="limitedEvidence">
           <AlertCircle size={16} />
-          <span>Evidence limited: GitHub rate limit or partial fetch failure. Add a token for deeper analysis.</span>
+          <span>Evidence limited: GitHub rate limit or partial fetch failure. Retry later for deeper analysis.</span>
         </div>
       )}
 
@@ -982,7 +975,7 @@ function OpportunityCard({ card }) {
             ))}
           </div>
         ) : (
-          <p className="muted">No clusters found. Add a GitHub token or try a broader topic.</p>
+          <p className="muted">No clusters found. Try a broader topic or retry later.</p>
         )}
       </section>
 
@@ -1042,7 +1035,6 @@ function ScoreMethod() {
 
 function App() {
   const [topic, setTopic] = useState("API testing tools");
-  const [token, setToken] = useState("");
   const [cards, setCards] = useState(() => demoCards());
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -1062,9 +1054,9 @@ function App() {
     try {
       let results = [];
       try {
-        results = await findOpportunitiesViaServer(topic.trim(), token.trim(), nextPage);
+        results = await findOpportunitiesViaServer(topic.trim(), nextPage);
       } catch {
-        results = await findOpportunities(topic.trim(), token.trim(), nextPage);
+        results = await findOpportunities(topic.trim(), nextPage);
       }
       setCards(results);
       if (!results.length) {
@@ -1072,7 +1064,7 @@ function App() {
       }
     } catch (err) {
       setError(err.message.includes("rate limit") || err.message.includes("403")
-        ? "GitHub rate limit hit. Add a free read-only GitHub token and search again."
+        ? "GitHub rate limit hit. Try again later."
         : err.message);
     } finally {
       setLoading(false);
@@ -1104,16 +1096,6 @@ function App() {
                 <Search size={18} />
                 <input value={topic} onChange={(event) => setTopic(event.target.value)} />
               </div>
-            </label>
-            <label>
-              GitHub token
-              <input
-                className="tokenInput"
-                value={token}
-                onChange={(event) => setToken(event.target.value)}
-                placeholder="Optional, read-only token for higher rate limit"
-                type="password"
-              />
             </label>
             <button className="primaryButton" disabled={!canSearch}>
               {loading ? <Loader2 className="spin" size={18} /> : <Sparkles size={18} />}
