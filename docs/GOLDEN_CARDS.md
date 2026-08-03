@@ -1,6 +1,6 @@
 # Golden Opportunity Cards
 
-These cards are manually calibrated examples. They help keep OSS Goldmine focused on useful, respectful, builder-ready recommendations instead of vague abandoned-repo hunting.
+These cards are manually calibrated examples. They help keep OSS Goldmine focused on useful, respectful, builder-ready demand-gap recommendations instead of vague repo hunting.
 
 ## 1. brookshi/Hitchhiker
 
@@ -9,6 +9,8 @@ Repository: [brookshi/Hitchhiker](https://github.com/brookshi/Hitchhiker)
 Category: API testing and collaboration
 
 Verdict: `Adapt`
+
+Opportunity type: `Stalled`
 
 Recommended wedge:
 
@@ -43,6 +45,8 @@ Category: React performance tooling
 
 Verdict: `Adapt`
 
+Opportunity type: `Stalled`
+
 Recommended wedge:
 
 ```text
@@ -75,6 +79,8 @@ Repository: [dmtolpeko/sqlines](https://github.com/dmtolpeko/sqlines)
 Category: Database migration
 
 Verdict: `Adapt`
+
+Opportunity type: `Stalled`
 
 Recommended wedge:
 

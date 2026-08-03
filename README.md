@@ -1,10 +1,10 @@
 # OSS Goldmine
 
-> Find open-source projects where demand is still alive but maintenance is fading, then turn the evidence into AI-ready opportunity cards.
+> Find buildable demand gaps in open-source software, then turn the evidence into AI-ready opportunity cards.
 
 ![OSS Goldmine preview](./docs/assets/oss-goldmine-preview.svg)
 
-OSS Goldmine is not another abandoned-repo list.
+OSS Goldmine is not another GitHub search wrapper or abandoned-repo list.
 
 It answers the question builders actually care about:
 
@@ -39,7 +39,7 @@ The app includes sample opportunity cards, so the first screen is useful before 
 Each opportunity card includes:
 
 - Demand Gap Score
-- Maintenance gap
+- Opportunity type: `Stalled`, `Overloaded`, or `Underserved`
 - Repeated issue themes
 - Build / Adapt / Watch verdict
 - Smallest useful wedge
@@ -58,7 +58,8 @@ The current version performs live GitHub evidence checks:
 - Fetch recent releases
 - Cluster demand-like issue themes
 - Flag stale issues and stale PRs
-- Penalize likely obsolete projects
+- Classify opportunities as `Stalled`, `Overloaded`, or `Underserved`
+- Penalize weak evidence and likely obsolete projects
 
 If GitHub rate limits are hit, cards are marked `Evidence limited` and downgraded to `Watch` unless demand evidence is strong enough.
 
@@ -72,7 +73,7 @@ Most discovery tools stop at:
 
 OSS Goldmine goes one step further:
 
-> Demand is still alive, maintenance is fading, and this is the smallest useful wedge to build next.
+> This is not just a repo. This is a buildable demand gap, and this is the smallest useful wedge to build next.
 
 ## How It Works
 
@@ -94,6 +95,7 @@ score =
 + fork signal
 + demand issue signal
 + stale issue signal
+- overload signal
 - active maintainer penalty
 - evidence penalty
 - archived penalty
@@ -109,9 +111,20 @@ Signal meanings:
 | Quiet months | Maintenance gap |
 | Forks | Revival or adaptation interest |
 | Demand-like issues | Repeated requests for support, migration, integration, export, CLI, API, etc. |
+| Stale PRs and issue volume | Possible maintainer overload |
 | Recent commits | Active maintenance reduces the gap |
 | Stale PRs | Contributor demand may exist but review capacity may be low |
 | Penalties | Archived repos, weak issue evidence, or likely-obsolete categories |
+
+## Opportunity Types
+
+OSS Goldmine does not require every project to be old. It classifies three types of buildable gaps:
+
+| Type | Meaning | Best wedge |
+| --- | --- | --- |
+| Stalled | Long quiet project with visible unresolved demand | replacement, migration tool, modern version |
+| Overloaded | Active project with more issues or PRs than maintainers can easily absorb | plugin, automation, audit report, companion tool |
+| Underserved | Known market where a narrow workflow still looks under-served | focused developer tool, narrow workflow utility |
 
 This is not an investment verdict. It is a fast filter for builders.
 

@@ -7,7 +7,7 @@
   <text x="104" y="74" fill="#FFFAF0" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="700">OSS Goldmine</text>
   <text x="72" y="152" fill="#FFFAF0" font-family="Inter, Arial, sans-serif" font-size="58" font-weight="800">Find buildable OSS</text>
   <text x="72" y="216" fill="#FFFAF0" font-family="Inter, Arial, sans-serif" font-size="58" font-weight="800">opportunities first.</text>
-  <text x="74" y="258" fill="#D7D3C6" font-family="Inter, Arial, sans-serif" font-size="20">Demand is alive. Maintenance is fading. Ship the smallest useful wedge.</text>
+  <text x="74" y="258" fill="#D7D3C6" font-family="Inter, Arial, sans-serif" font-size="20">Find Stalled, Overloaded, and Underserved OSS demand gaps.</text>
   <rect x="770" y="62" width="438" height="188" rx="8" fill="#14201B" fill-opacity="0.82" stroke="#667D72"/>
   <text x="796" y="101" fill="#D7D3C6" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="700">Topic</text>
   <rect x="796" y="116" width="386" height="46" rx="8" fill="#FFFAF0"/>
@@ -33,7 +33,7 @@
     <text x="202" y="595" fill="#315640" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="800">response</text>
     <rect x="282" y="576" width="70" height="28" rx="14" fill="#E8F1E9"/>
     <text x="301" y="595" fill="#315640" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="800">stress</text>
-    <text x="94" y="630" fill="#3E4A41" font-family="Inter, Arial, sans-serif" font-size="14">Adapt · 88 mo quiet</text>
+    <text x="94" y="630" fill="#3E4A41" font-family="Inter, Arial, sans-serif" font-size="14">Stalled · migration wedge</text>
   </g>
 
   <g>
@@ -51,7 +51,7 @@
     <text x="580" y="595" fill="#315640" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="800">render</text>
     <rect x="640" y="576" width="110" height="28" rx="14" fill="#E8F1E9"/>
     <text x="658" y="595" fill="#315640" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="800">performance</text>
-    <text x="486" y="630" fill="#3E4A41" font-family="Inter, Arial, sans-serif" font-size="14">Adapt · 43 mo quiet</text>
+    <text x="486" y="630" fill="#3E4A41" font-family="Inter, Arial, sans-serif" font-size="14">Underserved · report wedge</text>
   </g>
 
   <g>
@@ -69,7 +69,7 @@
     <text x="988" y="595" fill="#315640" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="800">legacy</text>
     <rect x="1052" y="576" width="92" height="28" rx="14" fill="#E8F1E9"/>
     <text x="1070" y="595" fill="#315640" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="800">migration</text>
-    <text x="878" y="630" fill="#3E4A41" font-family="Inter, Arial, sans-serif" font-size="14">Watch · competitor check needed</text>
+    <text x="878" y="630" fill="#3E4A41" font-family="Inter, Arial, sans-serif" font-size="14">Overloaded · automation wedge</text>
   </g>
 
   <defs>

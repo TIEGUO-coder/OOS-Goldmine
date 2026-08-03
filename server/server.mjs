@@ -165,6 +165,8 @@ const CATEGORY_RULES = [
 const CURATED_REPO_OVERRIDES = {
   "brookshi/Hitchhiker": {
     verdict: "Adapt",
+    type: "Stalled",
+    typeDescription: "Long quiet project with visible unresolved demand",
     wedge: "API collection migration diff",
     wedgeZh: "API collection migration diff",
     risk: "High competition",
@@ -173,6 +175,8 @@ const CURATED_REPO_OVERRIDES = {
   },
   "nitin42/react-perf-devtool": {
     verdict: "Adapt",
+    type: "Stalled",
+    typeDescription: "Long quiet project with visible unresolved demand",
     wedge: "React render regression report",
     wedgeZh: "React render regression report",
     risk: "Medium competition",
@@ -181,6 +185,8 @@ const CURATED_REPO_OVERRIDES = {
   },
   "dmtolpeko/sqlines": {
     verdict: "Adapt",
+    type: "Stalled",
+    typeDescription: "Long quiet project with visible unresolved demand",
     wedge: "SQL migration compatibility report",
     wedgeZh: "SQL migration compatibility report",
     risk: "High value, high correctness risk",
@@ -449,7 +455,8 @@ function scoreRepo(repo, analysis) {
   const forkSignal = Math.min(15, Math.log10((repo.forks_count || 0) + 1) * 6);
   const demandSignal = Math.min(18, analysis.demandIssues * 2.4 + analysis.clusterCount * 2.2);
   const staleIssueSignal = Math.min(12, analysis.staleOpenIssues * 1.6);
-  const activeMaintainerPenalty = analysis.recentCommitCount > 8 ? 18 : analysis.recentCommitCount > 2 ? 8 : 0;
+  const overloadedSignal = repo.open_issues_count >= 40 || analysis.openPulls >= 10 || analysis.stalePulls >= 5;
+  const activeMaintainerPenalty = overloadedSignal ? 0 : analysis.recentCommitCount > 8 ? 18 : analysis.recentCommitCount > 2 ? 8 : 0;
   const evidencePenalty = analysis.evidenceStatus === "limited" ? 25 : 0;
   const archivedPenalty = repo.archived ? 28 : 0;
   const emptyIssuePenalty = repo.open_issues_count === 0 ? 14 : 0;
@@ -479,13 +486,47 @@ function scoreRepo(repo, analysis) {
   };
 }
 
+function opportunityTypeFor(repo, analysis, category) {
+  const monthsQuiet = monthsSince(repo.pushed_at);
+  const hasDemand = analysis.demandIssues >= 2 || analysis.clusterCount >= 2 || analysis.staleOpenIssues >= 3;
+  const isOverloaded =
+    monthsQuiet < 24 &&
+    (repo.open_issues_count >= 40 || analysis.openPulls >= 10 || analysis.stalePulls >= 5) &&
+    analysis.demandIssues >= 3;
+
+  if (monthsQuiet >= 24 && hasDemand) {
+    return {
+      type: "Stalled",
+      typeDescription: "Long quiet project with visible unresolved demand",
+    };
+  }
+  if (isOverloaded) {
+    return {
+      type: "Overloaded",
+      typeDescription: "Active project with more issues or PRs than maintainers can easily absorb",
+    };
+  }
+  if (category && hasDemand) {
+    return {
+      type: "Underserved",
+      typeDescription: "Known market where a narrow workflow still looks under-served",
+    };
+  }
+  return {
+    type: "Watch",
+    typeDescription: "Not enough evidence for a buildable demand gap yet",
+  };
+}
+
 function classifyOpportunity(repo, themes, score, analysis) {
   const override = curatedOverrideFor(repo);
   if (override && analysis.evidenceStatus === "complete") return override;
   const category = categoryFor(repo, themes);
+  const opportunityType = opportunityTypeFor(repo, analysis, category);
   if (analysis.evidenceStatus === "limited" && analysis.demandIssues === 0 && analysis.clusterCount === 0) {
     return {
       verdict: "Watch",
+      ...opportunityType,
       wedge: category?.wedge || "evidence-first exploration",
       wedgeZh: category?.wedgeZh || "evidence-first exploration",
       why: "GitHub evidence is limited, so the current run cannot prove active demand. Add a token or retry later before deciding to adapt it.",
@@ -496,6 +537,7 @@ function classifyOpportunity(repo, themes, score, analysis) {
   if (analysis.obsoleteRisk === "high") {
     return {
       verdict: "Skip",
+      ...opportunityType,
       wedge: category?.wedge || "migration note, not a product",
       wedgeZh: category?.wedgeZh || "migration note, not a product",
       why: "The maintenance gap is visible, but platforms or mature alternatives may already cover the core need. Treat this as a migration guide or skip decision.",
@@ -506,6 +548,7 @@ function classifyOpportunity(repo, themes, score, analysis) {
   if (category) {
     return {
       verdict: "Adapt",
+      ...opportunityType,
       wedge: category.wedge,
       wedgeZh: category.wedgeZh,
       why: category.why,
@@ -516,6 +559,7 @@ function classifyOpportunity(repo, themes, score, analysis) {
   if (score >= 75) {
     return {
       verdict: "Adapt",
+      ...opportunityType,
       wedge: "narrow companion tool",
       wedgeZh: "narrow companion tool",
       why: "Demand and maintenance gaps are visible. Start with a narrow companion tool instead of cloning the original project.",
@@ -525,6 +569,7 @@ function classifyOpportunity(repo, themes, score, analysis) {
   }
   return {
     verdict: "Watch",
+    ...opportunityType,
     wedge: "evidence-first exploration",
     wedgeZh: "evidence-first exploration",
     why: "The signal is not strong enough yet. Review issue clusters and alternatives before building.",
@@ -544,6 +589,7 @@ Create a ${positioning} inspired by unmet demand around ${repo.name}.
 
 Evidence to inspect:
 - GitHub repo: ${repo.html_url}
+- Opportunity type: ${opportunity.type || "unknown"} - ${opportunity.typeDescription || "unknown"}
 - Open issues: ${repo.open_issues_count}
 - Stars: ${repo.stargazers_count}
 - Last push: ${repo.pushed_at?.slice(0, 10) || "unknown"}
@@ -567,7 +613,7 @@ Build the smallest useful wedge:
 5. Writer agent: produce README, demo GIF script, and launch post.
 
 Launch angle:
-"Demand is alive, maintenance is fading. Here is the smallest useful tool builders can ship next."`;
+"Stop guessing what to build. Find the smallest useful wedge inside real open-source demand."`;
 }
 
 async function fetchRepoEvidence(repo, token) {
@@ -588,16 +634,16 @@ async function fetchRepoEvidence(repo, token) {
 }
 
 async function findOpportunities(topic, page, token) {
-  const query = encodeURIComponent(`${topic} stars:>300 archived:false pushed:<2025-01-01`);
+  const query = encodeURIComponent(`${topic} stars:>300 archived:false`);
   const data = await githubFetch(
-    `https://api.github.com/search/repositories?q=${query}&sort=updated&order=asc&per_page=12&page=${page}`,
+    `https://api.github.com/search/repositories?q=${query}&sort=stars&order=desc&per_page=16&page=${page}`,
     token
   );
 
   const candidates = (data.items || [])
     .filter((repo) => hasMinimumTopicFit(repo, topic))
     .filter((repo) => !isLikelyPersonalConfigRepo(repo))
-    .slice(0, 6);
+    .slice(0, 8);
 
   const cards = await Promise.all(
     candidates.map(async (repo) => {
@@ -619,7 +665,10 @@ async function findOpportunities(topic, page, token) {
     })
   );
 
-  return cards.sort((a, b) => b.score - a.score).slice(0, 3);
+  return cards
+    .filter((card) => card.opportunity.type !== "Watch" || card.score >= 65)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3);
 }
 
 const server = http.createServer(async (req, res) => {

@@ -6,6 +6,7 @@ OSS Goldmine should stay small, evidence-first, and screenshot-friendly.
 
 - GitHub topic search
 - Demand Gap Score
+- Opportunity type classification: Stalled, Overloaded, Underserved
 - Sample opportunity cards
 - Live GitHub repository search
 - Optional GitHub token
