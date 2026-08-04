@@ -40,7 +40,7 @@ Each opportunity card includes:
 
 - Demand Gap Score
 - Opportunity type: `Stalled`, `Overloaded`, or `Underserved`
-- Repeated issue themes
+- Repeated demand themes
 - Build / Adapt / Watch verdict
 - Smallest useful wedge
 - Evidence links
@@ -56,7 +56,7 @@ The current version performs live GitHub evidence checks:
 - Fetch open pull requests
 - Fetch recent commits from the last 90 days
 - Fetch recent releases
-- Cluster demand-like issue themes
+- Cluster repeated demand themes
 - Flag stale issues and stale PRs
 - Classify opportunities as `Stalled`, `Overloaded`, or `Underserved`
 - Penalize weak evidence and likely obsolete projects

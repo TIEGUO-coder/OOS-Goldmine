@@ -986,7 +986,7 @@ function OpportunityCard({ card }) {
       </section>
 
       <section>
-        <h3>Demand clusters</h3>
+        <h3>Repeated demand themes</h3>
         {card.analysis?.clusters?.length ? (
           <div className="clusterList">
             {card.analysis.clusters.slice(0, 4).map((cluster) => (
@@ -997,7 +997,7 @@ function OpportunityCard({ card }) {
             ))}
           </div>
         ) : (
-          <p className="muted">No clusters found. Try a broader topic or retry later.</p>
+          <p className="muted">No repeated themes found. Try a broader topic or retry later.</p>
         )}
       </section>
 
