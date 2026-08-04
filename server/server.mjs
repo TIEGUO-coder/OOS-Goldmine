@@ -439,6 +439,7 @@ function buildAnalysis(repo, issueBundle, pulls = [], commits = [], releases = [
 
   return {
     demandIssues,
+    demandExamples: issueBundle.demandItems.slice(0, 8).map(slimIssue),
     bugIssues: issueBundle.bugItems.length,
     installIssues: issueBundle.installItems.length,
     staleOpenIssues: issueBundle.staleOpenItems.length,

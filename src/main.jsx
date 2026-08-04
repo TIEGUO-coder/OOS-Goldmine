@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
   AlertCircle,
@@ -640,6 +640,7 @@ function buildAnalysis(repo, issueBundle, pulls = [], commits = [], releases = [
 
   return {
     demandIssues,
+    demandExamples: issueBundle.demandItems.slice(0, 8).map(slimIssue),
     bugIssues: issueBundle.bugItems.length,
     installIssues: issueBundle.installItems.length,
     staleOpenIssues,
@@ -851,15 +852,22 @@ function Evidence({ card }) {
 
 function SignalGrid({ card }) {
   const analysis = card.analysis || {};
+  const hasDemandExamples = (analysis.demandExamples || []).length > 0;
   return (
     <div className="signalGrid">
       <div>
         <span>Confidence</span>
         <strong>{analysis.confidence ?? "n/a"}</strong>
       </div>
-      <div>
-        <span>Demand issues</span>
-        <strong>{analysis.demandIssues ?? 0}</strong>
+      <div className={hasDemandExamples ? "metricCard metricCardInteractive" : "metricCard"}>
+        <span>Demand signals</span>
+        {hasDemandExamples ? (
+          <button type="button" className="metricLink" onClick={() => card.onDemandClick?.()}>
+            <strong>{analysis.demandIssues ?? 0}</strong>
+          </button>
+        ) : (
+          <strong>{analysis.demandIssues ?? 0}</strong>
+        )}
       </div>
       <div>
         <span>Stale issues</span>
@@ -883,11 +891,24 @@ function SignalGrid({ card }) {
 
 function OpportunityCard({ card }) {
   const [copied, setCopied] = useState(false);
+  const [issueFilter, setIssueFilter] = useState("all");
+  const evidenceRef = useRef(null);
+  const demandExamples = card.analysis?.demandExamples || [];
+  const demandIds = new Set(demandExamples.map((issue) => issue.id));
+  const visibleIssues = issueFilter === "demand" ? card.issues.filter((issue) => demandIds.has(issue.id)) : card.issues;
 
   async function copyPlan() {
     await navigator.clipboard.writeText(card.plan);
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1600);
+  }
+
+  function focusDemandEvidence() {
+    if (!demandExamples.length) return;
+    setIssueFilter("demand");
+    window.requestAnimationFrame(() => {
+      evidenceRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   }
 
   return (
@@ -901,6 +922,7 @@ function OpportunityCard({ card }) {
             </a>
             {card.sample && <span className="sampleBadge">sample</span>}
           </div>
+          <span className="wedgeLabel">Smallest useful wedge</span>
           <h2>{card.opportunity.wedge}</h2>
           {card.opportunity.wedgeZh && card.opportunity.wedgeZh !== card.opportunity.wedge && (
             <p>{card.opportunity.wedgeZh}</p>
@@ -941,7 +963,7 @@ function OpportunityCard({ card }) {
         </div>
       )}
 
-      <SignalGrid card={card} />
+      <SignalGrid card={{ ...card, onDemandClick: focusDemandEvidence }} />
 
       <section>
         <h3>Why this may spread</h3>
@@ -979,17 +1001,37 @@ function OpportunityCard({ card }) {
         )}
       </section>
 
-      <section>
+      <section ref={evidenceRef}>
         <h3>Evidence links</h3>
+        {demandExamples.length > 0 && (
+          <div className="evidenceTabs" role="tablist" aria-label="Issue evidence filters">
+            <button
+              type="button"
+              className={issueFilter === "all" ? "evidenceTab evidenceTabActive" : "evidenceTab"}
+              onClick={() => setIssueFilter("all")}
+            >
+              All issues
+            </button>
+            <button
+              type="button"
+              className={issueFilter === "demand" ? "evidenceTab evidenceTabActive" : "evidenceTab"}
+              onClick={() => setIssueFilter("demand")}
+            >
+              Demand signals ({demandExamples.length})
+            </button>
+          </div>
+        )}
         <div className="issueList">
-          {card.issues.length ? (
-            card.issues.map((issue) => (
+          {visibleIssues.length ? (
+            visibleIssues.map((issue) => (
               <a href={issue.html_url} target="_blank" rel="noreferrer" key={issue.id}>
                 <span>{issue.title}</span>
                 {issue.state === "open" && <em>open</em>}
                 <ExternalLink size={14} />
               </a>
             ))
+          ) : demandExamples.length ? (
+            <p className="muted">No matching demand signal links were available in this run.</p>
           ) : (
             <p className="muted">Issue details unavailable in this run.</p>
           )}

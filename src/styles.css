@@ -346,8 +346,18 @@ input {
   white-space: nowrap;
 }
 
+.wedgeLabel {
+  display: block;
+  margin-top: 12px;
+  color: #6b746c;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
 .card h2 {
-  margin: 12px 0 5px;
+  margin: 4px 0 5px;
   font-size: 22px;
   line-height: 1.12;
 }
@@ -426,6 +436,34 @@ input {
 .evidence strong,
 .diagnosis strong {
   font-size: 17px;
+}
+
+.metricCard {
+  display: grid;
+}
+
+.metricCardInteractive {
+  position: relative;
+}
+
+.metricLink {
+  display: inline-flex;
+  justify-content: flex-start;
+  width: fit-content;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.metricLink strong {
+  border-bottom: 1px dashed #6f5527;
+}
+
+.metricLink:hover strong,
+.metricLink:focus-visible strong {
+  color: #6f5527;
 }
 
 .diagnosis {
@@ -591,6 +629,30 @@ input {
 .issueList {
   display: grid;
   gap: 8px;
+}
+
+.evidenceTabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.evidenceTab {
+  padding: 7px 10px;
+  border: 1px solid #d7d0c0;
+  border-radius: 999px;
+  background: #faf7ee;
+  color: #5b655d;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.evidenceTabActive {
+  border-color: #c8b372;
+  background: #fff2c8;
+  color: #6f5527;
 }
 
 .issueList a {
