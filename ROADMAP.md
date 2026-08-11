@@ -6,7 +6,7 @@ OSS Goldmine should feel like a daily opportunity feed, not a search dashboard.
 
 - One startup opportunity card at a time
 - Swipe left / right interaction
-- Local browser memory for saved and passed ideas
+- Local browser memory for saved and skipped ideas
 - GitHub evidence behind each card
 - Machine-readable `opportunities.json`
 - Daily brief format for Codex and other coding agents
@@ -18,7 +18,7 @@ OSS Goldmine should feel like a daily opportunity feed, not a search dashboard.
 - Add `Build / Watch / Kill` with clearer language
 - Add stronger "why now" logic
 - Add target user and first tiny test to every generated card
-- Avoid duplicate cards after save/pass
+- Avoid duplicate cards after save/skip
 
 ## V0.3 Daily Feed
 

@@ -13,7 +13,7 @@ OSS Goldmine deals one GitHub-based startup opportunity at a time. It is a daily
 This repo has two interfaces:
 
 - Humans swipe the web demo.
-- Agents read `opportunities.json`, `daily/`, and `prompts/`.
+- Agents start with `AGENTS.md`, then read `opportunities.json`, `daily/current.md`, and `prompts/`.
 
 If you do not want to browse cards yourself, paste this repo into Codex, Claude, Cursor, or another coding agent and ask it to pick the best opportunity for you.
 
@@ -58,7 +58,7 @@ Most tools ask you to search, compare, and think.
 OSS Goldmine does the first pass for you:
 
 - One card at a time, not a noisy table.
-- `Save` or `Pass`, not another dashboard to manage.
+- `Save` or `Skip`, not another dashboard to manage.
 - Startup framing, not raw repo metadata.
 - Evidence from stars, issues, stale work, and maintainer activity.
 - Machine-readable output so Codex, Claude, Cursor, or another coding agent can read it.
@@ -83,8 +83,10 @@ Ready-made prompts:
 
 Agent-readable data lives in:
 
+- [`AGENTS.md`](./AGENTS.md)
+- [`llms.txt`](./llms.txt)
 - [`opportunities.json`](./opportunities.json)
-- [`daily/2026-08-07.md`](./daily/2026-08-07.md)
+- [`daily/current.md`](./daily/current.md)
 - [`docs/GOLDEN_CARDS.md`](./docs/GOLDEN_CARDS.md)
 
 Daily card template:

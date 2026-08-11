@@ -3,3 +3,10 @@ dist
 .DS_Store
 .env
 .env.*
+
+# Local research notes and throwaway visual artifacts
+obsidian-*.md
+weekly_meeting_*.md
+*-current-card.png
+*-card-explainer-*.svg
+*-card-explainer-*.png

@@ -1,14 +1,15 @@
 # Pick An Opportunity
 
-Use this when you want Codex, Claude, Cursor, or MAH to read OSS Goldmine and choose what is worth pursuing.
+Use this when you want Codex, Claude, Cursor, or another coding agent to read OSS Goldmine and choose what is worth pursuing.
 
 ```text
 Read this OSS Goldmine repository.
 
 Use these files first:
+- AGENTS.md
 - README.md
 - opportunities.json
-- latest file in daily/
+- daily/current.md
 - docs/GOLDEN_CARDS.md
 
 My builder profile:

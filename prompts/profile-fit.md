@@ -3,7 +3,7 @@
 Use this when you have several saved cards and need a personal ranking.
 
 ```text
-Read opportunities.json and the latest daily brief.
+Read AGENTS.md, opportunities.json, and daily/current.md.
 
 My profile:
 - Strong skills:

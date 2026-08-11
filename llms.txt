@@ -1,0 +1,33 @@
+# OSS Goldmine
+
+OSS Goldmine is a daily opportunity radar for builders and coding agents.
+
+It turns GitHub demand signals into structured startup opportunity cards. The goal is to help a builder decide what to build, watch, or skip without browsing large repo lists.
+
+## Read This First
+
+- AGENTS.md: instructions for coding agents
+- opportunities.json: structured opportunity cards
+- daily/current.md: current daily brief
+- docs/GOLDEN_CARDS.md: calibrated examples
+- prompts/: reusable prompts for choosing, ranking, and building from cards
+
+## Core Workflow
+
+scan -> judge -> package -> deliver -> remember
+
+## Important Rules
+
+- Prefer narrow companion tools over full clones.
+- Do not recommend replacing original maintainers.
+- Do not treat stars alone as demand.
+- Use target user, first tiny test, risk, alternatives, and do_not_build when making decisions.
+- If evidence is weak, recommend Watch or Skip instead of Build.
+
+## Best Agent Task
+
+```text
+Read AGENTS.md, opportunities.json, and daily/current.md.
+Pick the best opportunity for my builder profile.
+Return one top pick, one watch item, one skip item, and one concrete action I should do today.
+```

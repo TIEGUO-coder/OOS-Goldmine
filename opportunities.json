@@ -1,19 +1,90 @@
 {
   "name": "OSS Goldmine",
-  "positioning": "Tinder for open-source startup ideas",
-  "updated_at": "2026-08-07",
-  "built_with": "MAH agent workflows",
+  "positioning": "Daily opportunity radar for builders and their AI agents",
+  "updated_at": "2026-08-11",
+  "workflow": ["scan", "judge", "package", "deliver", "remember"],
+  "agent_read_order": [
+    "README.md",
+    "opportunities.json",
+    "daily/current.md",
+    "docs/GOLDEN_CARDS.md",
+    "prompts/"
+  ],
   "cards": [
+    {
+      "id": "browser-automation-cost-guard",
+      "source_repo": "browserless/browserless",
+      "source_url": "https://github.com/browserless/browserless",
+      "verdict": "Build",
+      "score": 94,
+      "opportunity": "A browser automation cost guard",
+      "why_now": "Teams using headless browsers often discover runaway jobs, flaky sessions, and expensive retries too late.",
+      "target_user": "growth, QA, and data teams running browser automation",
+      "first_test": "Monitor job duration, retries, and failures, then flag the top expensive automation patterns.",
+      "risk": "Needs access to real automation logs.",
+      "alternatives": ["Browserless dashboards", "Datadog", "Grafana", "custom logs"],
+      "do_not_build": "Do not build another browser automation platform.",
+      "agent_prompt": "Turn this into a 3-day build plan for a tiny browser automation cost report.",
+      "signals": {
+        "stars": 11000,
+        "open_issues": 210,
+        "quiet_months": 16
+      }
+    },
+    {
+      "id": "knowledge-base-freshness-monitor",
+      "source_repo": "outline/outline",
+      "source_url": "https://github.com/outline/outline",
+      "verdict": "Build",
+      "score": 90,
+      "opportunity": "A knowledge-base freshness monitor",
+      "why_now": "Internal docs go stale quietly, and teams only notice after onboarding, support, or operations break.",
+      "target_user": "remote teams relying on internal knowledge bases",
+      "first_test": "Scan pages for old owners, stale dates, duplicate instructions, and missing update signals.",
+      "risk": "Needs integrations with real knowledge-base permissions.",
+      "alternatives": ["Notion AI", "Slab", "Guru", "custom doc audits"],
+      "do_not_build": "Do not build a full wiki or knowledge-base replacement.",
+      "agent_prompt": "Turn this into a small freshness report workflow for one exported knowledge base.",
+      "signals": {
+        "stars": 35000,
+        "open_issues": 410,
+        "quiet_months": 1
+      }
+    },
+    {
+      "id": "workflow-failure-explainer",
+      "source_repo": "n8n-io/n8n",
+      "source_url": "https://github.com/n8n-io/n8n",
+      "verdict": "Build",
+      "score": 89,
+      "opportunity": "A workflow failure explainer",
+      "why_now": "Automation tools are powerful, but debugging failed workflows still eats founder and ops time.",
+      "target_user": "ops teams running no-code or low-code automations",
+      "first_test": "Turn failed workflow logs into plain-English causes and suggested fixes.",
+      "risk": "Many failures are integration-specific and need good fixtures.",
+      "alternatives": ["n8n logs", "Zapier history", "Make scenario logs", "Datadog"],
+      "do_not_build": "Do not build a new automation platform.",
+      "agent_prompt": "Turn this into a log-to-explanation prototype using sample failed workflow runs.",
+      "signals": {
+        "stars": 98000,
+        "open_issues": 1600,
+        "quiet_months": 0
+      }
+    },
     {
       "id": "api-collection-migration-helper",
       "source_repo": "brookshi/Hitchhiker",
       "source_url": "https://github.com/brookshi/Hitchhiker",
       "verdict": "Build",
-      "score": 93,
+      "score": 88,
       "opportunity": "A lightweight Postman migration helper",
       "why_now": "Old API testing teams still need a painless way to move collections, compare responses, and avoid breaking workflows.",
       "target_user": "API-heavy dev teams leaving legacy tools",
       "first_test": "Build a tiny importer that compares two collections and exports a migration report.",
+      "risk": "High competition in the API client market.",
+      "alternatives": ["Postman", "Insomnia", "Hoppscotch", "Bruno"],
+      "do_not_build": "Do not build a full API client.",
+      "agent_prompt": "Turn this into a 3-day build plan for a migration diff report.",
       "signals": {
         "stars": 2214,
         "open_issues": 93,
@@ -25,11 +96,15 @@
       "source_repo": "nitin42/react-perf-devtool",
       "source_url": "https://github.com/nitin42/react-perf-devtool",
       "verdict": "Build",
-      "score": 100,
+      "score": 86,
       "opportunity": "A React render regression detector",
       "why_now": "React apps keep getting slower, but most teams do not want to live inside profiler traces.",
       "target_user": "frontend teams shipping React dashboards",
       "first_test": "Turn profiling output into a shareable before-and-after performance report.",
+      "risk": "Needs usable React profiling fixtures.",
+      "alternatives": ["React DevTools Profiler", "Chrome Performance Panel", "Lighthouse"],
+      "do_not_build": "Do not build a full browser devtool replacement.",
+      "agent_prompt": "Turn this into a report-first React performance prototype.",
       "signals": {
         "stars": 2300,
         "open_issues": 31,
@@ -37,19 +112,103 @@
       }
     },
     {
+      "id": "branded-api-docs-handoff-kit",
+      "source_repo": "swagger-api/swagger-ui",
+      "source_url": "https://github.com/swagger-api/swagger-ui",
+      "verdict": "Build",
+      "score": 84,
+      "opportunity": "A branded API docs handoff kit",
+      "why_now": "Teams need polished API docs, but customizing and handing them to non-engineers is still messy.",
+      "target_user": "B2B teams exposing APIs to customers",
+      "first_test": "Generate a hosted docs preview plus a handoff checklist from one OpenAPI file.",
+      "risk": "Customization needs can become too broad.",
+      "alternatives": ["Swagger UI", "Redocly", "Stoplight", "Mintlify"],
+      "do_not_build": "Do not build a full API documentation platform.",
+      "agent_prompt": "Turn this into a one-file OpenAPI docs handoff prototype.",
+      "signals": {
+        "stars": 27800,
+        "open_issues": 770,
+        "quiet_months": 2
+      }
+    },
+    {
+      "id": "pdf-workflow-qa-bot",
+      "source_repo": "mozilla/pdf.js",
+      "source_url": "https://github.com/mozilla/pdf.js",
+      "verdict": "Build",
+      "score": 82,
+      "opportunity": "A PDF workflow QA bot",
+      "why_now": "Many products depend on PDFs, but teams still manually check rendering, forms, and export quality.",
+      "target_user": "ops-heavy SaaS teams handling contracts, invoices, and reports",
+      "first_test": "Compare expected fields, screenshot pages, and flag broken exports for one PDF workflow.",
+      "risk": "PDF edge cases can explode quickly.",
+      "alternatives": ["Adobe tools", "PDF.js", "Playwright PDF checks", "manual QA"],
+      "do_not_build": "Do not build a general PDF editor.",
+      "agent_prompt": "Turn this into a PDF export QA checklist and screenshot prototype.",
+      "signals": {
+        "stars": 52000,
+        "open_issues": 680,
+        "quiet_months": 3
+      }
+    },
+    {
+      "id": "storybook-drift-reporter",
+      "source_repo": "storybookjs/storybook",
+      "source_url": "https://github.com/storybookjs/storybook",
+      "verdict": "Watch",
+      "score": 78,
+      "opportunity": "A design-system drift reporter",
+      "why_now": "Component libraries grow fast, but teams rarely know which stories, props, and screenshots drifted.",
+      "target_user": "frontend platform teams with shared component libraries",
+      "first_test": "Scan Storybook metadata and produce a weekly drift report for component owners.",
+      "risk": "May overlap with visual regression and design-system tooling.",
+      "alternatives": ["Chromatic", "Ladle", "Percy", "Backlight"],
+      "do_not_build": "Do not build a full Storybook alternative.",
+      "agent_prompt": "Turn this into a metadata-only drift report before visual diffing.",
+      "signals": {
+        "stars": 88000,
+        "open_issues": 2300,
+        "quiet_months": 0
+      }
+    },
+    {
       "id": "debugger-migration-checklist",
       "source_repo": "node-inspector/node-inspector",
       "source_url": "https://github.com/node-inspector/node-inspector",
       "verdict": "Watch",
-      "score": 100,
+      "score": 70,
       "opportunity": "A debugger migration checklist",
       "why_now": "Legacy debugging tools still attract attention, but the safer opportunity is helping teams move to modern defaults.",
       "target_user": "teams maintaining older Node.js services",
       "first_test": "Package a migration guide plus automated config checks for VS Code and Chrome DevTools.",
+      "risk": "Likely obsolete if official tooling already covers most needs.",
+      "alternatives": ["Chrome DevTools", "Node.js inspector", "VS Code debugger"],
+      "do_not_build": "Do not rebuild Node Inspector.",
+      "agent_prompt": "Turn this into a migration checklist, not a new debugger.",
       "signals": {
         "stars": 12600,
         "open_issues": 243,
         "quiet_months": 102
+      }
+    },
+    {
+      "id": "api-workspace-cleanup-agent",
+      "source_repo": "hoppscotch/hoppscotch",
+      "source_url": "https://github.com/hoppscotch/hoppscotch",
+      "verdict": "Watch",
+      "score": 74,
+      "opportunity": "An API workspace cleanup agent",
+      "why_now": "API workspaces become messy, duplicated, and impossible to hand over after a few sprints.",
+      "target_user": "small dev teams with growing API collections",
+      "first_test": "Detect duplicate requests, stale environment variables, and missing examples in one workspace.",
+      "risk": "Needs import/export support from target API tools.",
+      "alternatives": ["Hoppscotch", "Postman", "Bruno", "Insomnia"],
+      "do_not_build": "Do not build a new API client.",
+      "agent_prompt": "Turn this into a cleanup report for one exported API workspace.",
+      "signals": {
+        "stars": 74000,
+        "open_issues": 520,
+        "quiet_months": 0
       }
     }
   ]
