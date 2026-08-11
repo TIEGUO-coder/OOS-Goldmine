@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import {
   AlertCircle,
   ArrowRight,
+  Check,
   Copy,
   ShieldAlert,
   ExternalLink,
@@ -12,8 +13,11 @@ import {
   RefreshCw,
   Search,
   Sparkles,
+  X,
 } from "lucide-react";
 import "./styles.css";
+
+const MEMORY_KEY = "oss-goldmine-memory-v1";
 
 const SAMPLE_TOPICS = [
   "API testing tools",
@@ -22,6 +26,205 @@ const SAMPLE_TOPICS = [
   "OpenAPI security",
   "AI coding tools",
 ];
+
+function readMemory() {
+  if (typeof window === "undefined") return { saved: [], savedCards: [], passed: [], passedCards: [], topics: [] };
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(MEMORY_KEY) || "{}");
+    return {
+      saved: Array.isArray(parsed.saved) ? parsed.saved : [],
+      savedCards: Array.isArray(parsed.savedCards) ? parsed.savedCards : [],
+      passed: Array.isArray(parsed.passed) ? parsed.passed : [],
+      passedCards: Array.isArray(parsed.passedCards) ? parsed.passedCards : [],
+      topics: Array.isArray(parsed.topics) ? parsed.topics : [],
+    };
+  } catch {
+    return { saved: [], savedCards: [], passed: [], passedCards: [], topics: [] };
+  }
+}
+
+function writeMemory(memory) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(MEMORY_KEY, JSON.stringify(memory));
+}
+
+function startupCardCopy(card) {
+  const repoName = card.repo.name || "this repo";
+  const wedge = card.opportunity.wedge || "a narrow companion product";
+  const risk = card.opportunity.risk || "needs competitor check";
+  const themes = (card.themes || []).slice(0, 3).join(", ");
+
+  if ((card.repo.full_name || "").includes("Hitchhiker")) {
+    return {
+      title: "A lightweight Postman migration helper",
+      hook: "Old API testing teams still need a painless way to move collections, compare responses, and avoid breaking workflows.",
+      audience: "API-heavy dev teams leaving legacy tools",
+      nextStep: "Build a tiny importer that compares two collections and exports a migration report.",
+    };
+  }
+
+  if ((card.repo.full_name || "").includes("react-perf-devtool")) {
+    return {
+      title: "A React render regression detector",
+      hook: "React apps keep getting slower, but most teams do not want to live inside profiler traces.",
+      audience: "frontend teams shipping React dashboards",
+      nextStep: "Turn profiling output into a shareable before/after performance report.",
+    };
+  }
+
+  if ((card.repo.full_name || "").includes("node-inspector")) {
+    return {
+      title: "A debugger migration checklist",
+      hook: "Legacy debugging tools still attract attention, but the real opportunity is helping teams move to modern defaults.",
+      audience: "teams maintaining older Node.js services",
+      nextStep: "Package a migration guide plus automated config checks for VS Code and Chrome DevTools.",
+    };
+  }
+
+  if ((card.repo.full_name || "").includes("swagger-api/swagger-ui")) {
+    return {
+      title: "A branded API docs handoff kit",
+      hook: "Teams still need polished API docs, but customizing and handing them to non-engineers is messy.",
+      audience: "B2B teams exposing APIs to customers",
+      nextStep: "Generate a hosted docs preview plus a handoff checklist from an OpenAPI file.",
+    };
+  }
+
+  if ((card.repo.full_name || "").includes("mozilla/pdf.js")) {
+    return {
+      title: "A PDF workflow QA bot",
+      hook: "Many products depend on PDFs, but teams still manually check rendering, forms, and export quality.",
+      audience: "ops-heavy SaaS teams handling contracts, invoices, and reports",
+      nextStep: "Build a checker that compares expected fields, screenshots pages, and flags broken exports.",
+    };
+  }
+
+  if ((card.repo.full_name || "").includes("storybookjs/storybook")) {
+    return {
+      title: "A design-system drift reporter",
+      hook: "Component libraries grow fast, but teams rarely know which stories, props, and screenshots drifted.",
+      audience: "frontend platform teams with shared component libraries",
+      nextStep: "Scan Storybook metadata and produce a weekly drift report for owners.",
+    };
+  }
+
+  if ((card.repo.full_name || "").includes("hoppscotch/hoppscotch")) {
+    return {
+      title: "An API workspace cleanup agent",
+      hook: "API workspaces become messy, duplicated, and impossible to hand over after a few sprints.",
+      audience: "small dev teams with growing API collections",
+      nextStep: "Detect duplicate requests, stale env vars, and missing examples in one workspace.",
+    };
+  }
+
+  if ((card.repo.full_name || "").includes("outline/outline")) {
+    return {
+      title: "A knowledge-base freshness monitor",
+      hook: "Internal docs go stale quietly, and teams only notice after support or onboarding breaks.",
+      audience: "remote teams relying on internal knowledge bases",
+      nextStep: "Find old docs, ownerless pages, and conflicting instructions, then send a freshness report.",
+    };
+  }
+
+  if ((card.repo.full_name || "").includes("n8n-io/n8n")) {
+    return {
+      title: "A workflow failure explainer",
+      hook: "Automation tools are powerful, but debugging failed workflows still eats founder and ops time.",
+      audience: "ops teams running no-code automations",
+      nextStep: "Turn failed workflow logs into plain-English causes and suggested fixes.",
+    };
+  }
+
+  if ((card.repo.full_name || "").includes("browserless/browserless")) {
+    return {
+      title: "A browser automation cost guard",
+      hook: "Teams using headless browsers often discover runaway jobs and flaky sessions too late.",
+      audience: "growth, QA, and scraping teams running browser automation",
+      nextStep: "Monitor job duration, retries, and failures, then flag expensive automation patterns.",
+    };
+  }
+
+  return {
+    title: `A ${wedge} for ${repoName} users`,
+    hook: `${repoName} shows demand, but the winning move is not cloning it. Start with the smallest painful workflow around ${themes || "repeated open-source requests"}.`,
+    audience: card.opportunity.type === "Overloaded" ? "users around overloaded OSS projects" : "builders watching under-served developer workflows",
+    nextStep: `Validate ${wedge} against current alternatives. Main risk: ${risk}.`,
+  };
+}
+
+function savedCardSnapshot(card) {
+  const copy = startupCardCopy(card);
+  return {
+    id: card.repo.id,
+    title: copy.title,
+    hook: copy.hook,
+    repo: card.repo.full_name,
+    score: card.score,
+    card,
+  };
+}
+
+function cardPreferenceTerms(card) {
+  if (!card) return [];
+  const copy = startupCardCopy(card);
+  const text = [
+    card.repo.name,
+    card.repo.full_name,
+    card.repo.description,
+    ...(card.repo.topics || []),
+    ...(card.themes || []),
+    card.opportunity.wedge,
+    copy.title,
+    copy.hook,
+    copy.audience,
+  ].join(" ").toLowerCase();
+  const candidates = [
+    "api",
+    "migration",
+    "react",
+    "performance",
+    "browser",
+    "extension",
+    "openapi",
+    "documentation",
+    "pdf",
+    "workflow",
+    "automation",
+    "knowledge",
+    "debugging",
+    "testing",
+    "frontend",
+    "devtools",
+    "security",
+    "database",
+  ];
+  return candidates.filter((term) => text.includes(term));
+}
+
+function preferenceProfile(memory) {
+  const scores = new Map();
+  (memory.savedCards || []).forEach((item) => {
+    cardPreferenceTerms(item.card).forEach((term) => {
+      scores.set(term, (scores.get(term) || 0) + 2);
+    });
+  });
+  (memory.passedCards || []).forEach((item) => {
+    cardPreferenceTerms(item.card).forEach((term) => {
+      scores.set(term, (scores.get(term) || 0) - 1);
+    });
+  });
+  const ranked = [...scores.entries()].sort((a, b) => b[1] - a[1]);
+  return {
+    likes: ranked.filter(([, score]) => score > 0).slice(0, 4).map(([term]) => term),
+    avoids: ranked.filter(([, score]) => score < 0).slice(0, 3).map(([term]) => term),
+  };
+}
+
+function personalizedTopic(baseTopic, profile) {
+  const likes = profile.likes || [];
+  if (!likes.length) return baseTopic;
+  return [...new Set([...likes, ...topicTerms(baseTopic)])].slice(0, 5).join(" ");
+}
 
 const DEMO_REPOS = [
   {
@@ -65,6 +268,201 @@ const DEMO_REPOS = [
     pushed_at: "2018-01-18T00:00:00Z",
     archived: false,
     topics: ["node", "debugging", "devtools"],
+  },
+  {
+    id: "demo-swagger-ui",
+    full_name: "swagger-api/swagger-ui",
+    name: "swagger-ui",
+    html_url: "https://github.com/swagger-api/swagger-ui",
+    description: "API documentation UI for visualizing and interacting with OpenAPI definitions.",
+    stargazers_count: 27800,
+    forks_count: 9000,
+    open_issues_count: 770,
+    pushed_at: "2026-06-10T00:00:00Z",
+    archived: false,
+    topics: ["openapi", "api", "documentation"],
+  },
+  {
+    id: "demo-pdfjs",
+    full_name: "mozilla/pdf.js",
+    name: "pdf.js",
+    html_url: "https://github.com/mozilla/pdf.js",
+    description: "PDF reader in JavaScript used by browsers and web apps.",
+    stargazers_count: 52000,
+    forks_count: 9900,
+    open_issues_count: 680,
+    pushed_at: "2026-05-18T00:00:00Z",
+    archived: false,
+    topics: ["pdf", "viewer", "javascript"],
+  },
+  {
+    id: "demo-storybook",
+    full_name: "storybookjs/storybook",
+    name: "storybook",
+    html_url: "https://github.com/storybookjs/storybook",
+    description: "Workshop for building UI components and pages in isolation.",
+    stargazers_count: 88000,
+    forks_count: 9500,
+    open_issues_count: 2300,
+    pushed_at: "2026-07-12T00:00:00Z",
+    archived: false,
+    topics: ["storybook", "components", "frontend"],
+  },
+  {
+    id: "demo-hoppscotch",
+    full_name: "hoppscotch/hoppscotch",
+    name: "hoppscotch",
+    html_url: "https://github.com/hoppscotch/hoppscotch",
+    description: "Open-source API development ecosystem.",
+    stargazers_count: 74000,
+    forks_count: 5200,
+    open_issues_count: 520,
+    pushed_at: "2026-07-20T00:00:00Z",
+    archived: false,
+    topics: ["api", "testing", "developer-tools"],
+  },
+  {
+    id: "demo-outline",
+    full_name: "outline/outline",
+    name: "outline",
+    html_url: "https://github.com/outline/outline",
+    description: "Knowledge base and wiki for growing teams.",
+    stargazers_count: 35000,
+    forks_count: 2900,
+    open_issues_count: 410,
+    pushed_at: "2026-06-30T00:00:00Z",
+    archived: false,
+    topics: ["wiki", "knowledge-base", "collaboration"],
+  },
+  {
+    id: "demo-n8n",
+    full_name: "n8n-io/n8n",
+    name: "n8n",
+    html_url: "https://github.com/n8n-io/n8n",
+    description: "Workflow automation platform for technical teams.",
+    stargazers_count: 98000,
+    forks_count: 31000,
+    open_issues_count: 1600,
+    pushed_at: "2026-07-28T00:00:00Z",
+    archived: false,
+    topics: ["automation", "workflow", "integrations"],
+  },
+  {
+    id: "demo-browserless",
+    full_name: "browserless/browserless",
+    name: "browserless",
+    html_url: "https://github.com/browserless/browserless",
+    description: "Browser automation and headless Chrome service for production workloads.",
+    stargazers_count: 11000,
+    forks_count: 870,
+    open_issues_count: 210,
+    pushed_at: "2026-04-15T00:00:00Z",
+    archived: false,
+    topics: ["browser", "automation", "puppeteer"],
+  },
+  {
+    id: "demo-prisma",
+    full_name: "prisma/prisma",
+    name: "prisma",
+    html_url: "https://github.com/prisma/prisma",
+    description: "Next-generation ORM for Node.js and TypeScript.",
+    stargazers_count: 42000,
+    forks_count: 1700,
+    open_issues_count: 2500,
+    pushed_at: "2026-07-30T00:00:00Z",
+    archived: false,
+    topics: ["database", "orm", "typescript"],
+  },
+  {
+    id: "demo-playwright",
+    full_name: "microsoft/playwright",
+    name: "playwright",
+    html_url: "https://github.com/microsoft/playwright",
+    description: "Framework for web testing and automation.",
+    stargazers_count: 78000,
+    forks_count: 4300,
+    open_issues_count: 1200,
+    pushed_at: "2026-07-29T00:00:00Z",
+    archived: false,
+    topics: ["testing", "browser", "automation"],
+  },
+  {
+    id: "demo-vite",
+    full_name: "vitejs/vite",
+    name: "vite",
+    html_url: "https://github.com/vitejs/vite",
+    description: "Next generation frontend tooling.",
+    stargazers_count: 76000,
+    forks_count: 7100,
+    open_issues_count: 850,
+    pushed_at: "2026-07-27T00:00:00Z",
+    archived: false,
+    topics: ["frontend", "build-tool", "devtools"],
+  },
+  {
+    id: "demo-nextjs",
+    full_name: "vercel/next.js",
+    name: "next.js",
+    html_url: "https://github.com/vercel/next.js",
+    description: "The React framework for production.",
+    stargazers_count: 134000,
+    forks_count: 29000,
+    open_issues_count: 3100,
+    pushed_at: "2026-07-31T00:00:00Z",
+    archived: false,
+    topics: ["react", "framework", "frontend"],
+  },
+  {
+    id: "demo-k6",
+    full_name: "grafana/k6",
+    name: "k6",
+    html_url: "https://github.com/grafana/k6",
+    description: "Modern load testing tool, using Go and JavaScript.",
+    stargazers_count: 28000,
+    forks_count: 1300,
+    open_issues_count: 520,
+    pushed_at: "2026-07-25T00:00:00Z",
+    archived: false,
+    topics: ["testing", "performance", "devtools"],
+  },
+  {
+    id: "demo-excalidraw",
+    full_name: "excalidraw/excalidraw",
+    name: "excalidraw",
+    html_url: "https://github.com/excalidraw/excalidraw",
+    description: "Virtual whiteboard for sketching hand-drawn like diagrams.",
+    stargazers_count: 98000,
+    forks_count: 9500,
+    open_issues_count: 700,
+    pushed_at: "2026-07-24T00:00:00Z",
+    archived: false,
+    topics: ["collaboration", "whiteboard", "productivity"],
+  },
+  {
+    id: "demo-calcom",
+    full_name: "calcom/cal.com",
+    name: "cal.com",
+    html_url: "https://github.com/calcom/cal.com",
+    description: "Scheduling infrastructure for everyone.",
+    stargazers_count: 38000,
+    forks_count: 9300,
+    open_issues_count: 650,
+    pushed_at: "2026-07-26T00:00:00Z",
+    archived: false,
+    topics: ["scheduling", "calendar", "productivity"],
+  },
+  {
+    id: "demo-appwrite",
+    full_name: "appwrite/appwrite",
+    name: "appwrite",
+    html_url: "https://github.com/appwrite/appwrite",
+    description: "Build like a team of hundreds with open-source backend APIs.",
+    stargazers_count: 53000,
+    forks_count: 4800,
+    open_issues_count: 780,
+    pushed_at: "2026-07-22T00:00:00Z",
+    archived: false,
+    topics: ["backend", "database", "auth"],
   },
 ];
 
@@ -703,7 +1101,11 @@ function demoCards() {
         ? ["postman", "response", "stress", "schedule", "team"]
         : repo.name === "react-perf-devtool"
           ? ["react", "render", "performance", "chrome", "profiler"]
-          : ["debugger", "chrome", "node", "legacy", "migration"];
+          : repo.name === "node-inspector"
+            ? ["debugger", "chrome", "node", "legacy", "migration"]
+            : repo.topics?.length
+              ? repo.topics
+              : ["developer", "workflow", "automation"];
     const issueBundle = analyzeIssueClusters([
       {
         id: `${repo.id}-issue-1`,
@@ -739,6 +1141,37 @@ function demoCards() {
       sample: true,
     };
   });
+}
+
+function dailyKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function seededNumber(seed) {
+  let hash = 2166136261;
+  for (let index = 0; index < seed.length; index += 1) {
+    hash ^= seed.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return () => {
+    hash += 0x6d2b79f5;
+    let value = hash;
+    value = Math.imul(value ^ (value >>> 15), value | 1);
+    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function dailyCardsForDate(key) {
+  const random = seededNumber(`oss-goldmine-${key}`);
+  return demoCards()
+    .map((card) => ({ card, rank: random() }))
+    .sort((a, b) => a.rank - b.rank)
+    .slice(0, 10)
+    .map((item) => item.card);
 }
 
 async function githubFetch(url) {
@@ -1075,34 +1508,365 @@ function ScoreMethod() {
   );
 }
 
+function SwipeCard({ card, loading, onSwipe, onDetails }) {
+  const [drag, setDrag] = useState({ active: false, x: 0, y: 0, startX: 0, startY: 0 });
+  const [flyAction, setFlyAction] = useState("");
+  const movedRef = useRef(false);
+  const copy = card ? startupCardCopy(card) : null;
+  const rotation = clamp(drag.x / 18, -12, 12);
+  const intent = drag.x > 70 ? "save" : drag.x < -70 ? "pass" : "";
+  const dragProgress = clamp(Math.abs(drag.x) / 150, 0, 1);
+  const saveOpacity = drag.x > 0 ? dragProgress * 0.52 : 0;
+  const passOpacity = drag.x < 0 ? dragProgress * 0.52 : 0;
+  const transform = flyAction
+    ? `translate(${flyAction === "save" ? 720 : -720}px, -42px) rotate(${flyAction === "save" ? 24 : -24}deg)`
+    : `translate(${drag.x}px, ${drag.y}px) rotate(${rotation}deg)`;
+
+  function startDrag(event) {
+    if (loading || flyAction) return;
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+    movedRef.current = false;
+    setDrag({ active: true, x: 0, y: 0, startX: event.clientX, startY: event.clientY });
+  }
+
+  function moveDrag(event) {
+    if (!drag.active || loading || flyAction) return;
+    if (Math.abs(event.clientX - drag.startX) > 8 || Math.abs(event.clientY - drag.startY) > 8) {
+      movedRef.current = true;
+    }
+    setDrag((current) => ({
+      ...current,
+      x: event.clientX - current.startX,
+      y: event.clientY - current.startY,
+    }));
+  }
+
+  function flyOut(action) {
+    if (!card || loading || flyAction) return;
+    setFlyAction(action);
+    setDrag({ active: false, x: 0, y: 0, startX: 0, startY: 0 });
+    window.setTimeout(() => {
+      onSwipe(action);
+      setFlyAction("");
+    }, 260);
+  }
+
+  function openDetails(event) {
+    if (loading || flyAction || movedRef.current) return;
+    event.stopPropagation();
+    onDetails?.();
+  }
+
+  function endDrag() {
+    if (!drag.active || loading || flyAction) return;
+    const action = drag.x > 110 ? "save" : drag.x < -110 ? "pass" : "";
+    setDrag({ active: false, x: 0, y: 0, startX: 0, startY: 0 });
+    if (action) flyOut(action);
+  }
+
+  return (
+    <div className="singleSwipe">
+      <article
+        className={`heroCard deckCard ${drag.active ? "deckCardDragging" : ""} ${flyAction ? "deckCardFlying" : ""} ${intent ? `deckCard${intent === "save" ? "Save" : "Pass"}` : ""}`}
+        aria-label="Startup opportunity card"
+        onPointerDown={startDrag}
+        onPointerMove={moveDrag}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        onClick={openDetails}
+        style={{
+          transform,
+          "--save-opacity": saveOpacity,
+          "--pass-opacity": passOpacity,
+          "--hint-scale": 0.88 + dragProgress * 0.16,
+        }}
+      >
+        {loading && !card ? (
+          <div className="heroCardEmpty">
+            <Loader2 className="spin" size={34} />
+            <h2>Mining the next opportunity</h2>
+            <p>OSS Goldmine is scanning GitHub demand gaps and dealing one card.</p>
+          </div>
+        ) : card ? (
+          <>
+            <div className="heroCardTop">
+              <span>{card.opportunity.verdict === "Skip" ? "Kill" : card.opportunity.verdict}</span>
+              <strong>{card.score}</strong>
+            </div>
+            <span className="wedgeLabel">Startup opportunity</span>
+            <h2>{copy.title}</h2>
+            <p>{copy.hook}</p>
+            <div className="opportunityNotes">
+              <div>
+                <span>Who might pay attention</span>
+                <strong>{copy.audience}</strong>
+              </div>
+              <div>
+                <span>First tiny test</span>
+                <strong>{copy.nextStep}</strong>
+              </div>
+            </div>
+            <div className="miniSignals">
+              <div>
+                <span>{compactNumber(card.repo.stargazers_count)} stars</span>
+              </div>
+              <div>
+                <span>{compactNumber(card.repo.open_issues_count)} issues</span>
+              </div>
+              <div>
+                <span>{card.monthsQuiet} quiet mo</span>
+              </div>
+            </div>
+            <div className="heroRepo">
+              <Github size={16} />
+              <span>{card.repo.full_name}</span>
+            </div>
+            <span className="tapHint">Tap for details · ← Skip · Save →</span>
+            <div className="cardHint cardHintPass">
+              <X size={58} />
+              <span>Skip</span>
+            </div>
+            <div className="cardHint cardHintSave">
+              <Check size={58} />
+              <span>Save</span>
+            </div>
+            {loading && (
+              <div className="dealingVeil">
+                <Loader2 className="spin" size={18} />
+                <span>Dealing next card</span>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="heroCardEmpty">
+            <Pickaxe size={30} />
+            <h2>No card yet</h2>
+            <p>Deal one opportunity to start swiping.</p>
+          </div>
+        )}
+      </article>
+      <div className="swipeActions heroSwipeActions" aria-label="Opportunity actions">
+        <button className="passButton" type="button" onClick={(event) => { event.stopPropagation(); flyOut("pass"); }} aria-label="Skip this opportunity" disabled={loading || Boolean(flyAction)}>
+          <X size={22} />
+          <span>Skip</span>
+        </button>
+        <button className="saveButton" type="button" onClick={(event) => { event.stopPropagation(); flyOut("save"); }} aria-label="Save this opportunity" disabled={loading || Boolean(flyAction)}>
+          <Check size={22} />
+          <span>Save</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function DetailDrawer({ card, open, onClose, onSave }) {
+  const [copied, setCopied] = useState(false);
+  if (!card) return null;
+  const copy = startupCardCopy(card);
+  const clusters = card.analysis?.clusters || [];
+  const alternatives = card.opportunity.alternatives || [];
+
+  async function copyPlan() {
+    await navigator.clipboard.writeText(card.plan);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1600);
+  }
+
+  return (
+    <div className={`drawerOverlay ${open ? "drawerOverlayOpen" : ""}`} aria-hidden={!open}>
+      <aside className="detailDrawer" aria-label="Opportunity details">
+        <div className="drawerTop">
+          <div>
+            <span className="eyebrow">Opportunity details</span>
+            <h2>{copy.title}</h2>
+          </div>
+          <button className="iconButton" type="button" onClick={onClose} aria-label="Close details">
+            <X size={20} />
+          </button>
+        </div>
+
+        <p className="drawerLead">{copy.hook}</p>
+
+        <div className="drawerSection">
+          <h3>Who wants this</h3>
+          <p>{copy.audience}</p>
+        </div>
+
+        <div className="drawerSection">
+          <h3>First tiny test</h3>
+          <p>{copy.nextStep}</p>
+        </div>
+
+        <div className="drawerSection">
+          <h3>Evidence</h3>
+          <Evidence card={card} />
+          <a className="repoLink" href={card.repo.html_url} target="_blank" rel="noreferrer">
+            <Github size={16} />
+            <span>{card.repo.full_name}</span>
+            <ExternalLink size={14} />
+          </a>
+        </div>
+
+        <div className="drawerSection">
+          <h3>Risk check</h3>
+          <div className="riskBox">
+            <ShieldAlert size={16} />
+            <span>{card.opportunity.risk || "Needs competitor check"}</span>
+          </div>
+          {alternatives.length > 0 && (
+            <div className="alternatives">
+              {alternatives.map((name) => (
+                <span key={name}>{name}</span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="drawerSection">
+          <h3>Repeated themes</h3>
+          {clusters.length ? (
+            <div className="clusterList">
+              {clusters.slice(0, 3).map((cluster) => (
+                <div key={cluster.name} className="cluster">
+                  <strong>{cluster.name}</strong>
+                  <span>{cluster.count} hits</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="muted">No repeated themes found in this run.</p>
+          )}
+        </div>
+
+        <div className="drawerSection">
+          <h3>Ask Codex</h3>
+          <p>Turn this card into a small build plan instead of starting from a blank prompt.</p>
+          <button className="secondaryButton" type="button" onClick={copyPlan}>
+            <Copy size={16} />
+            {copied ? "Copied" : "Copy build prompt"}
+          </button>
+        </div>
+
+        <div className="drawerActions">
+          <button className="secondaryButton" type="button" onClick={onClose}>
+            Keep swiping
+          </button>
+          <button className="saveButton" type="button" onClick={onSave}>
+            <Check size={18} />
+            Save this
+          </button>
+        </div>
+
+        <div className="drawerWorkflowLine">
+          <Sparkles size={15} />
+          <span>Built as an agent-run opportunity workflow</span>
+        </div>
+      </aside>
+    </div>
+  );
+}
+
+function SavedDrawer({ items, open, onClose, onOpenCard, onClear }) {
+  return (
+    <div className={`drawerOverlay ${open ? "drawerOverlayOpen" : ""}`} aria-hidden={!open}>
+      <aside className="detailDrawer savedDrawer" aria-label="Saved opportunities">
+        <div className="drawerTop">
+          <div>
+            <span className="eyebrow">Saved stack</span>
+            <h2>{items.length} saved opportunities</h2>
+          </div>
+          <button className="iconButton" type="button" onClick={onClose} aria-label="Close saved stack">
+            <X size={20} />
+          </button>
+        </div>
+
+        {items.length ? (
+          <div className="savedStackList">
+            {items.map((item) => (
+              <button
+                className="savedStackItem"
+                type="button"
+                key={item.id}
+                onClick={() => onOpenCard(item.card)}
+              >
+                <span>{item.score}</span>
+                <strong>{item.title}</strong>
+                <small>{item.repo}</small>
+                <p>{item.hook}</p>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="drawerSection">
+            <h3>No saved cards yet</h3>
+            <p>Swipe right on an opportunity to keep it here.</p>
+            <button className="secondaryButton" type="button" onClick={onClear}>
+              Clear old saved state
+            </button>
+          </div>
+        )}
+      </aside>
+    </div>
+  );
+}
+
 function App() {
+  const [deckDate] = useState(() => dailyKey());
+  const [dailyDeck] = useState(() => dailyCardsForDate(dailyKey()));
   const [topic, setTopic] = useState("API testing tools");
-  const [cards, setCards] = useState(() => demoCards());
+  const [card, setCard] = useState(() => dailyDeck[0]);
+  const [dailyIndex, setDailyIndex] = useState(0);
+  const [memory, setMemory] = useState(() => readMemory());
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [savedOpen, setSavedOpen] = useState(false);
+  const [selectedSavedCard, setSelectedSavedCard] = useState(null);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const canSearch = topic.trim().length >= 2 && !loading;
-  const subtitle = useMemo(
-    () => "Find Stalled, Overloaded, and Underserved demand gaps in open-source software.",
-    []
-  );
+  const savedCards = memory.savedCards || [];
+  const profile = preferenceProfile(memory);
+  const hasDailyCardsLeft = dailyIndex < dailyDeck.length - 1;
+  const subtitle = `Your ${deckDate} opportunity inbox is already mined. Review one card, swipe right to save or left to skip, and let the radar learn what to bring tomorrow.`;
 
-  async function runSearch(nextPage = 1) {
-    if (!topic.trim()) return;
+  function remember(nextMemory) {
+    setMemory(nextMemory);
+    writeMemory(nextMemory);
+  }
+
+  function memoryWithTopic(baseMemory, topicText) {
+    const cleanTopic = topicText.trim();
+    if (!cleanTopic) return baseMemory;
+    const topics = [cleanTopic, ...(baseMemory.topics || []).filter((item) => item.toLowerCase() !== cleanTopic.toLowerCase())].slice(0, 5);
+    return { ...baseMemory, topics };
+  }
+
+  async function runSearch(nextPage = 1, excludedIds = new Set([...memory.saved, ...memory.passed]), baseMemory = memory) {
+    const searchTopic = personalizedTopic(topic.trim(), preferenceProfile(baseMemory));
+    if (!searchTopic.trim()) return;
     setLoading(true);
     setError("");
     setPage(nextPage);
     try {
       let results = [];
       try {
-        results = await findOpportunitiesViaServer(topic.trim(), nextPage);
+        results = await findOpportunitiesViaServer(searchTopic, nextPage);
       } catch {
-        results = await findOpportunities(topic.trim(), nextPage);
+        results = await findOpportunities(searchTopic, nextPage);
       }
-      setCards(results);
+      const samples = demoCards();
+      const nextCard =
+        results.find((item) => !excludedIds.has(item.repo.id)) ||
+        samples.find((item) => !excludedIds.has(item.repo.id)) ||
+        samples[nextPage % samples.length];
+      setCard(nextCard);
+      setDailyIndex(dailyDeck.length);
+      setDetailsOpen(false);
+      setSelectedSavedCard(null);
+      remember(memoryWithTopic(baseMemory, topic));
       if (!results.length) {
-        setError("No strong opportunities found. Try a broader topic.");
+        setError("No strong live card found, so a sample card was dealt.");
       }
     } catch (err) {
       setError(err.message.includes("rate limit") || err.message.includes("403")
@@ -1111,6 +1875,39 @@ function App() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function swipeCard(action) {
+    if (!card || loading) return;
+    const id = card.repo.id;
+    const saved = memory.saved.filter((item) => item !== id);
+    const savedCards = (memory.savedCards || []).filter((item) => item.id !== id);
+    const passed = memory.passed.filter((item) => item !== id);
+    const passedCards = (memory.passedCards || []).filter((item) => item.id !== id);
+    const nextMemory =
+      action === "save"
+        ? { ...memory, saved: [id, ...saved].slice(0, 24), savedCards: [savedCardSnapshot(card), ...savedCards].slice(0, 24), passed, passedCards }
+        : { ...memory, saved, savedCards, passed: [id, ...passed].slice(0, 48), passedCards: [savedCardSnapshot(card), ...passedCards].slice(0, 48) };
+    remember(nextMemory);
+    setDetailsOpen(false);
+    setSelectedSavedCard(null);
+    if (hasDailyCardsLeft) {
+      const nextIndex = dailyIndex + 1;
+      setDailyIndex(nextIndex);
+      setCard(dailyDeck[nextIndex]);
+      return;
+    }
+    await runSearch(page + 1, new Set([...nextMemory.saved, ...nextMemory.passed]), nextMemory);
+  }
+
+  function dealNextCard() {
+    if (hasDailyCardsLeft) {
+      const nextIndex = dailyIndex + 1;
+      setDailyIndex(nextIndex);
+      setCard(dailyDeck[nextIndex]);
+      return;
+    }
+    runSearch(page + 1);
   }
 
   return (
@@ -1122,79 +1919,117 @@ function App() {
         </div>
         <div className="heroGrid">
           <div>
-            <h1>Find buildable OSS opportunities before the crowd does.</h1>
+            <span className="heroKicker">Daily opportunity radar for builders</span>
+            <h1>Your 10 GitHub startup cards are ready.</h1>
             <p>{subtitle}</p>
-          </div>
-          <form
-            className="searchPanel"
-            onSubmit={(event) => {
-              event.preventDefault();
-              runSearch(1);
-            }}
-          >
-            <label>
-              Topic
-              <div className="inputRow">
-                <Search size={18} />
-                <input value={topic} onChange={(event) => setTopic(event.target.value)} />
-              </div>
-            </label>
-            <button className="primaryButton" disabled={!canSearch}>
-              {loading ? <Loader2 className="spin" size={18} /> : <Sparkles size={18} />}
-              Find gold
-              <ArrowRight size={18} />
-            </button>
-            <div className="chips">
-              {SAMPLE_TOPICS.map((item) => (
-                <button type="button" key={item} onClick={() => setTopic(item)}>
-                  {item}
-                </button>
-              ))}
+            <div className="deliveryStrip" aria-label="Daily workflow">
+              <span>Scan GitHub</span>
+              <ArrowRight size={14} />
+              <span>Judge demand</span>
+              <ArrowRight size={14} />
+              <span>Deal 10 cards</span>
+              <ArrowRight size={14} />
+              <span>Learn from swipes</span>
             </div>
-          </form>
+            <div className="heroWorkflowLine">
+              <Sparkles size={16} />
+              <span>Agent workflow: scan / judge / deliver / remember</span>
+            </div>
+          </div>
+          <SwipeCard card={card} loading={loading} onSwipe={swipeCard} onDetails={() => setDetailsOpen(true)} />
         </div>
       </section>
 
-      <section className="results">
-        <div className="sectionHead">
+      <section className="singlePanel">
+        <form
+          className="radarPanel"
+          onSubmit={(event) => {
+            event.preventDefault();
+            runSearch(1);
+          }}
+        >
           <div>
-            <h2>Opportunity cards</h2>
-            <p>Each card recommends a small wedge, not a full clone. Sample cards are replaced after live search.</p>
+            <span className="eyebrow">Optional tuning</span>
+            <h2>Want a narrower radar?</h2>
+            <p>The first 10 cards are already mined. Tune this only when you want the agent to chase a specific market.</p>
           </div>
-          <div className="sectionActions">
-            <button className="secondaryButton" onClick={() => setCards(demoCards())}>
-              <Sparkles size={16} />
-              Load samples
-            </button>
-            <button className="secondaryButton" onClick={() => runSearch(page + 1)} disabled={!canSearch}>
-              <RefreshCw size={16} />
-              Explore another batch
-            </button>
+          <label>
+            Theme
+            <div className="inputRow">
+              <Search size={18} />
+              <input value={topic} onChange={(event) => setTopic(event.target.value)} />
+            </div>
+          </label>
+          <button className="primaryButton" disabled={!canSearch}>
+            {loading ? <Loader2 className="spin" size={18} /> : <Sparkles size={18} />}
+            Tune radar
+            <ArrowRight size={18} />
+          </button>
+          <div className="chips radarChips">
+            {[...new Set([...memory.topics, ...SAMPLE_TOPICS])].slice(0, 7).map((item) => (
+              <button type="button" key={item} onClick={() => setTopic(item)}>
+                {item}
+              </button>
+            ))}
+          </div>
+        </form>
+        <div className="useCaseBar">
+          <div>
+            <span>How people use it</span>
+            <strong>Open the daily deck, swipe fast, save the few cards worth deeper work.</strong>
+          </div>
+          <div>
+            <span>Why it is a webpage</span>
+            <strong>A shareable demo and card inbox today. A push-based agent workflow later.</strong>
           </div>
         </div>
-
         {error && (
           <div className="alert">
             <AlertCircle size={18} />
             <span>{error}</span>
           </div>
         )}
-
-        <div className="cards">
-          {cards.map((card) => (
-            <OpportunityCard key={card.repo.id} card={card} />
-          ))}
-        </div>
-
-        {!cards.length && !loading && !error && (
-          <div className="empty">
-            <Pickaxe size={32} />
-            <p>Search a builder topic to generate three opportunity cards.</p>
+        <div className="memoryBar">
+          <button className="memoryButton" type="button" onClick={() => setSavedOpen(true)}>
+            <span>Saved Stack</span>
+            <strong>{savedCards.length}</strong>
+          </button>
+          <div>
+            <span>Skipped</span>
+            <strong>{memory.passed.length}</strong>
           </div>
-        )}
-
-        <ScoreMethod />
+          <div className="learningStatus">
+            <span>Learning</span>
+            <strong>{profile.likes.length ? profile.likes.join(", ") : "not yet"}</strong>
+          </div>
+          <button className="secondaryButton" onClick={dealNextCard} disabled={!canSearch && !hasDailyCardsLeft}>
+            <RefreshCw size={16} />
+            {hasDailyCardsLeft ? "Deal daily card" : "Search live card"}
+          </button>
+        </div>
       </section>
+      <DetailDrawer
+        card={card}
+        open={detailsOpen && !selectedSavedCard}
+        onClose={() => setDetailsOpen(false)}
+        onSave={() => swipeCard("save")}
+      />
+      <DetailDrawer
+        card={selectedSavedCard}
+        open={Boolean(selectedSavedCard)}
+        onClose={() => setSelectedSavedCard(null)}
+        onSave={() => setSelectedSavedCard(null)}
+      />
+      <SavedDrawer
+        items={savedCards}
+        open={savedOpen}
+        onClose={() => setSavedOpen(false)}
+        onClear={() => remember({ ...memory, saved: [], savedCards: [], passed: [], passedCards: [] })}
+        onOpenCard={(savedCard) => {
+          setSavedOpen(false);
+          setSelectedSavedCard(savedCard);
+        }}
+      />
     </main>
   );
 }

@@ -1,49 +1,81 @@
 # Launch Copy
 
-## Short Post
+## Reddit Short Post
 
-I built OSS Goldmine: a tiny tool that finds GitHub repos where demand is still alive but maintenance is fading.
+Title:
 
-It does not tell builders to clone old projects.
+```text
+I built a daily opportunity radar for open-source startup ideas
+```
 
-It turns repo and issue signals into opportunity cards:
+Body:
 
-- Demand Gap Score
-- Maintenance gap
-- Repeated issue themes
-- Smallest useful wedge
-- AI Build Plan
+```text
+I made OSS Goldmine, a small GitHub project that deals one open-source startup opportunity at a time.
 
-Repo: https://github.com/TIEGUO-coder/OOS-Goldmine
+Instead of giving you another repo list, it turns GitHub signals into a swipeable card:
 
-Demo: https://tieguo-coder.github.io/OOS-Goldmine/
+- What is the opportunity?
+- Why might now be a good time?
+- Who might care?
+- What is the first tiny test?
 
-## Longer Post
-
-Most abandoned repo finders stop at "this repo is old."
-
-That is not enough for builders.
-
-The real question is:
-
-What demand is still alive, what maintenance is fading, and what small companion tool is worth building next?
-
-OSS Goldmine searches GitHub, scores demand gaps, reads issue signals, and generates AI-ready opportunity cards.
-
-The goal is not to shame maintainers or clone old projects. The goal is to help AI builders find smaller, respectful, useful wedges.
+You can use the web demo, or point Codex / Claude / Cursor at the repo and ask it to pick the best opportunity for your skills.
 
 Repo: https://github.com/TIEGUO-coder/OOS-Goldmine
-
 Demo: https://tieguo-coder.github.io/OOS-Goldmine/
+```
+
+## Reddit More Technical Post
+
+Title:
+
+```text
+I made a GitHub-native startup idea feed that coding agents can read
+```
+
+Body:
+
+```text
+I have been experimenting with a different shape for idea discovery:
+
+Not a search tool.
+Not an abandoned repo list.
+Not a generic startup idea generator.
+
+OSS Goldmine scans GitHub signals and packages them as one-card startup opportunities. The card is simple: opportunity, why now, target user, first tiny test, and source repo.
+
+The repo also includes machine-readable data, so you can ask Codex / Claude / Cursor to read it and choose the opportunity that fits you best.
+
+The current version is intentionally small. I am trying to test whether "daily open-source opportunity cards" are more useful than another dashboard.
+
+Repo: https://github.com/TIEGUO-coder/OOS-Goldmine
+Demo: https://tieguo-coder.github.io/OOS-Goldmine/
+```
+
+## X / LinkedIn
+
+```text
+I built OSS Goldmine: a daily opportunity radar for open-source startup ideas.
+
+It deals one GitHub-based opportunity at a time:
+
+Swipe right: worth building.
+Swipe left: not today.
+
+The repo is also readable by Codex / Claude / Cursor, so your coding agent can help pick the best idea for you.
+```
 
 ## Hacker News Title Ideas
 
-- Show HN: OSS Goldmine finds buildable opportunities in fading GitHub repos
-- Show HN: I built a tool that turns stale GitHub repos into AI-ready build briefs
-- Show HN: Find open-source demand gaps before building
+- Show HN: OSS Goldmine, a daily opportunity radar for builders
+- Show HN: A swipeable startup idea feed mined from GitHub
+- Show HN: I built a GitHub opportunity feed readable by coding agents
 
-## X Title Ideas
+## Workflow Line
 
-- I built a tool that turns fading GitHub repos into AI-ready opportunity cards.
-- Stop cloning abandoned repos. Find the smallest useful wedge instead.
-- Demand is alive. Maintenance is fading. What should builders ship next?
+Use this lightly. Do not lead with it.
+
+```text
+Built as an agent-run opportunity workflow.
+```

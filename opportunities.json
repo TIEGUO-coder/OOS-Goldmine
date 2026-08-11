@@ -1,0 +1,56 @@
+{
+  "name": "OSS Goldmine",
+  "positioning": "Tinder for open-source startup ideas",
+  "updated_at": "2026-08-07",
+  "built_with": "MAH agent workflows",
+  "cards": [
+    {
+      "id": "api-collection-migration-helper",
+      "source_repo": "brookshi/Hitchhiker",
+      "source_url": "https://github.com/brookshi/Hitchhiker",
+      "verdict": "Build",
+      "score": 93,
+      "opportunity": "A lightweight Postman migration helper",
+      "why_now": "Old API testing teams still need a painless way to move collections, compare responses, and avoid breaking workflows.",
+      "target_user": "API-heavy dev teams leaving legacy tools",
+      "first_test": "Build a tiny importer that compares two collections and exports a migration report.",
+      "signals": {
+        "stars": 2214,
+        "open_issues": 93,
+        "quiet_months": 91
+      }
+    },
+    {
+      "id": "react-render-regression-detector",
+      "source_repo": "nitin42/react-perf-devtool",
+      "source_url": "https://github.com/nitin42/react-perf-devtool",
+      "verdict": "Build",
+      "score": 100,
+      "opportunity": "A React render regression detector",
+      "why_now": "React apps keep getting slower, but most teams do not want to live inside profiler traces.",
+      "target_user": "frontend teams shipping React dashboards",
+      "first_test": "Turn profiling output into a shareable before-and-after performance report.",
+      "signals": {
+        "stars": 2300,
+        "open_issues": 31,
+        "quiet_months": 44
+      }
+    },
+    {
+      "id": "debugger-migration-checklist",
+      "source_repo": "node-inspector/node-inspector",
+      "source_url": "https://github.com/node-inspector/node-inspector",
+      "verdict": "Watch",
+      "score": 100,
+      "opportunity": "A debugger migration checklist",
+      "why_now": "Legacy debugging tools still attract attention, but the safer opportunity is helping teams move to modern defaults.",
+      "target_user": "teams maintaining older Node.js services",
+      "first_test": "Package a migration guide plus automated config checks for VS Code and Chrome DevTools.",
+      "signals": {
+        "stars": 12600,
+        "open_issues": 243,
+        "quiet_months": 102
+      }
+    }
+  ]
+}

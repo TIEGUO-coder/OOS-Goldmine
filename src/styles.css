@@ -1,8 +1,8 @@
 :root {
   color: #18201b;
-  background: #f6f4ef;
+  background: #f5f2ea;
   font-family:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Avenir Next", "Gill Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -26,18 +26,22 @@ input {
   font: inherit;
 }
 
+button {
+  color: inherit;
+}
+
 main {
   min-height: 100vh;
 }
 
 .hero {
   background:
-    linear-gradient(115deg, rgba(29, 63, 52, 0.92), rgba(11, 16, 17, 0.82)),
+    linear-gradient(115deg, rgba(24, 43, 36, 0.94), rgba(11, 16, 17, 0.8)),
     url("https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1800&q=80");
   background-size: cover;
   background-position: center;
   color: #fffaf0;
-  padding: 32px clamp(18px, 4vw, 56px) 44px;
+  padding: 28px clamp(18px, 4vw, 56px) 38px;
 }
 
 .brand {
@@ -54,34 +58,80 @@ main {
 
 .heroGrid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 440px);
-  gap: clamp(28px, 6vw, 72px);
-  align-items: end;
+  grid-template-columns: minmax(0, 0.95fr) minmax(340px, 480px);
+  gap: clamp(28px, 5vw, 64px);
+  align-items: center;
   max-width: 1180px;
-  min-height: 420px;
+  min-height: 500px;
   margin: 0 auto;
-  padding-top: 54px;
+  padding-top: 34px;
 }
 
 h1 {
   max-width: 780px;
   margin: 0;
-  font-size: clamp(44px, 7vw, 84px);
+  font-size: clamp(48px, 7vw, 86px);
   line-height: 0.96;
   letter-spacing: 0;
 }
 
 .hero p {
   max-width: 640px;
-  margin: 24px 0 0;
+  margin: 22px 0 0;
   color: rgba(255, 250, 240, 0.82);
   font-size: 19px;
   line-height: 1.6;
 }
 
+.heroKicker {
+  display: inline-flex;
+  margin-bottom: 18px;
+  padding: 7px 10px;
+  border: 1px solid rgba(240, 184, 79, 0.38);
+  background: rgba(240, 184, 79, 0.13);
+  color: #ffe0a2;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.heroWorkflowLine {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px;
+  color: rgba(255, 250, 240, 0.76);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.deliveryStrip {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 620px;
+  margin-top: 22px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  color: rgba(255, 250, 240, 0.84);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.deliveryStrip svg {
+  color: rgba(240, 184, 79, 0.8);
+}
+
 .searchPanel {
   display: grid;
   gap: 16px;
+  max-width: 520px;
+  margin-top: 28px;
   padding: 18px;
   border: 1px solid rgba(255, 255, 255, 0.25);
   background: rgba(13, 22, 19, 0.68);
@@ -164,10 +214,763 @@ input {
   font-size: 12px;
 }
 
+.searchPanelNote {
+  margin: -4px 0 0;
+  color: rgba(255, 250, 240, 0.68);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.heroCard {
+  position: relative;
+  display: grid;
+  gap: 16px;
+  min-height: 470px;
+  padding: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background:
+    linear-gradient(180deg, rgba(255, 253, 247, 0.96), rgba(255, 247, 220, 0.96));
+  color: #18201b;
+  border-radius: 10px;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.34);
+  transform: rotate(1.2deg);
+}
+
+.singleSwipe {
+  display: grid;
+  gap: 18px;
+  align-self: center;
+  perspective: 1200px;
+}
+
+.deckCard {
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  will-change: transform;
+  transition:
+    transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+}
+
+.deckCardDragging {
+  transition:
+    box-shadow 120ms ease,
+    border-color 120ms ease;
+}
+
+.deckCardFlying {
+  pointer-events: none;
+  transition:
+    transform 260ms cubic-bezier(0.25, 0.72, 0.18, 1),
+    opacity 240ms ease;
+  opacity: 0.2;
+}
+
+.deckCard:active {
+  cursor: grabbing;
+}
+
+.deckCardSave {
+  border-color: rgba(35, 116, 91, 0.55);
+  box-shadow: 0 30px 90px rgba(35, 116, 91, 0.34);
+}
+
+.deckCardPass {
+  border-color: rgba(163, 59, 59, 0.55);
+  box-shadow: 0 30px 90px rgba(163, 59, 59, 0.34);
+}
+
+.heroCard::before {
+  position: absolute;
+  inset: 14px;
+  z-index: -1;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  content: "";
+  transform: rotate(-4deg);
+}
+
+.heroCardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.heroCardTop span {
+  color: #6f786f;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.heroCardTop strong {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border: 1px solid #dbc285;
+  background: #fff2c8;
+  color: #1b251f;
+  border-radius: 999px;
+  font-size: 24px;
+}
+
+.heroCard h2 {
+  margin: 0;
+  font-size: 36px;
+  line-height: 1.05;
+}
+
+.heroCard p {
+  margin: 0;
+  color: #405045;
+  font-size: 15px;
+  line-height: 1.58;
+}
+
+.heroRepo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #e4ddcf;
+  background: #faf7ee;
+  border-radius: 8px;
+  color: #416252;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.heroRepo span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tapHint {
+  justify-self: center;
+  color: #6f786f;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.opportunityNotes {
+  display: grid;
+  gap: 10px;
+}
+
+.opportunityNotes div {
+  display: grid;
+  gap: 5px;
+  padding: 11px 12px;
+  border: 1px solid #e4ddcf;
+  background: #faf7ee;
+  border-radius: 8px;
+}
+
+.opportunityNotes span {
+  color: #6f786f;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.opportunityNotes strong {
+  color: #26342b;
+  font-size: 14px;
+  line-height: 1.38;
+}
+
+.miniSignals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.miniSignals div {
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+  padding: 7px 8px;
+  border: 1px solid #e4ddcf;
+  background: #fffdf7;
+  border-radius: 999px;
+}
+
+.miniSignals span {
+  color: #6f786f;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.cardHint {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 2px;
+  width: 132px;
+  height: 132px;
+  border: 3px solid currentColor;
+  border-radius: 999px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%) scale(var(--hint-scale, 0.88));
+  transition:
+    opacity 80ms linear,
+    transform 80ms linear;
+}
+
+.cardHint span {
+  font-size: 14px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cardHintPass {
+  left: 22%;
+  color: #a33b3b;
+  opacity: var(--pass-opacity, 0);
+}
+
+.cardHintSave {
+  right: 22%;
+  color: #23745b;
+  opacity: var(--save-opacity, 0);
+}
+
+.deckCardPass .cardHintPass,
+.deckCardSave .cardHintSave {
+  transform: translateY(-50%) scale(var(--hint-scale, 1));
+}
+
+.dealingVeil {
+  position: absolute;
+  inset: auto 18px 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  border: 1px solid #e4ddcf;
+  background: rgba(255, 253, 247, 0.9);
+  border-radius: 8px;
+  color: #506155;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.heroCardEmpty {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.heroCardEmpty h2,
+.heroCardEmpty p {
+  margin: 0;
+}
+
 .results {
   max-width: 1180px;
   margin: 0 auto;
   padding: 34px clamp(18px, 4vw, 56px) 72px;
+}
+
+.singlePanel {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 22px clamp(18px, 4vw, 56px) 48px;
+}
+
+.radarPanel,
+.useCaseBar {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 16px;
+  padding: 18px;
+  border: 1px solid #ddd6c7;
+  background: #fffdf7;
+  border-radius: 10px;
+  box-shadow: 0 14px 40px rgba(39, 36, 27, 0.08);
+}
+
+.radarPanel {
+  grid-template-columns: minmax(220px, 1fr) minmax(220px, 330px) auto;
+  align-items: end;
+}
+
+.radarPanel h2,
+.radarPanel p,
+.useCaseBar span,
+.useCaseBar strong {
+  margin: 0;
+}
+
+.radarPanel h2 {
+  font-size: 24px;
+  line-height: 1.1;
+}
+
+.radarPanel p {
+  margin-top: 8px;
+  color: #667066;
+  line-height: 1.5;
+}
+
+.radarPanel label {
+  color: #506155;
+}
+
+.radarPanel .primaryButton {
+  min-width: 148px;
+  padding: 0 16px;
+}
+
+.radarChips {
+  grid-column: 1 / -1;
+}
+
+.radarChips button {
+  border-color: #ddd6c7;
+  background: #faf7ee;
+  color: #506155;
+}
+
+.useCaseBar {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.useCaseBar div {
+  display: grid;
+  gap: 6px;
+}
+
+.useCaseBar span {
+  color: #6f786f;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.useCaseBar strong {
+  color: #26342b;
+  font-size: 15px;
+  line-height: 1.42;
+}
+
+.memoryBar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.memoryBar div,
+.memoryButton {
+  display: inline-grid;
+  grid-auto-flow: column;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid #ddd6c7;
+  background: #fffdf7;
+  border-radius: 8px;
+}
+
+.memoryButton {
+  cursor: pointer;
+}
+
+.memoryButton:hover,
+.memoryButton:focus-visible {
+  border-color: #c8b372;
+  background: #fff7dc;
+}
+
+.memoryBar span,
+.memoryButton span {
+  color: #6f786f;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.memoryBar strong,
+.memoryButton strong {
+  font-size: 18px;
+}
+
+.learningStatus {
+  max-width: min(420px, 100%);
+}
+
+.learningStatus strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.drawerOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  justify-content: flex-end;
+  background: rgba(11, 16, 17, 0);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 180ms ease,
+    background 180ms ease;
+}
+
+.drawerOverlayOpen {
+  background: rgba(11, 16, 17, 0.45);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.detailDrawer {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+  width: min(520px, 100vw);
+  height: 100%;
+  overflow: auto;
+  padding: 24px;
+  background: #fffdf7;
+  color: #18201b;
+  box-shadow: -24px 0 80px rgba(0, 0, 0, 0.28);
+  transform: translateX(100%);
+  transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.drawerOverlayOpen .detailDrawer {
+  transform: translateX(0);
+}
+
+.drawerTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.drawerTop h2 {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.08;
+}
+
+.iconButton {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border: 1px solid #ddd6c7;
+  background: #faf7ee;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.drawerLead,
+.drawerSection p {
+  margin: 0;
+  color: #405045;
+  line-height: 1.58;
+}
+
+.drawerSection {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid #e4ddcf;
+  background: #fffaf0;
+  border-radius: 8px;
+}
+
+.drawerSection h3 {
+  margin: 0;
+  color: #506155;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.repoLink {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) 14px;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #e4ddcf;
+  background: #faf7ee;
+  border-radius: 8px;
+  color: #416252;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.repoLink span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.drawerActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.drawerActions .saveButton {
+  min-height: 42px;
+}
+
+.drawerWorkflowLine {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #667066;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.savedDrawer {
+  width: min(560px, 100vw);
+}
+
+.savedStackList {
+  display: grid;
+  gap: 12px;
+}
+
+.savedStackItem {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 5px 12px;
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #e4ddcf;
+  background: #fffaf0;
+  border-radius: 8px;
+  color: #18201b;
+  cursor: pointer;
+  text-align: left;
+}
+
+.savedStackItem:hover,
+.savedStackItem:focus-visible {
+  border-color: #c8b372;
+  background: #fff7dc;
+}
+
+.savedStackItem span {
+  display: grid;
+  place-items: center;
+  grid-row: span 3;
+  width: 48px;
+  height: 48px;
+  border: 1px solid #dbc285;
+  background: #fff2c8;
+  border-radius: 999px;
+  font-weight: 900;
+}
+
+.savedStackItem strong,
+.savedStackItem small,
+.savedStackItem p {
+  min-width: 0;
+}
+
+.savedStackItem strong {
+  overflow: hidden;
+  font-size: 17px;
+  line-height: 1.22;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.savedStackItem small {
+  color: #416252;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.savedStackItem p {
+  margin: 0;
+  color: #667066;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.swipeLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 310px;
+  gap: 20px;
+  align-items: start;
+}
+
+.swipeStage {
+  display: grid;
+  gap: 16px;
+  max-width: 760px;
+}
+
+.swipeStage .card {
+  min-height: 620px;
+}
+
+.swipeActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.heroSwipeActions {
+  align-self: end;
+}
+
+.passButton,
+.saveButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 54px;
+  border: 0;
+  border-radius: 8px;
+  color: #fffdf7;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.passButton:disabled,
+.saveButton:disabled {
+  opacity: 0.62;
+  cursor: not-allowed;
+}
+
+.passButton {
+  background: #a33b3b;
+}
+
+.saveButton {
+  background: #23745b;
+}
+
+.passButton:hover,
+.saveButton:hover,
+.passButton:focus-visible,
+.saveButton:focus-visible {
+  filter: brightness(1.06);
+}
+
+.memoryPanel,
+.emptyDeck {
+  padding: 20px;
+  border: 1px solid #ddd6c7;
+  background: #fffdf7;
+  border-radius: 8px;
+  box-shadow: 0 14px 40px rgba(39, 36, 27, 0.08);
+}
+
+.memoryPanel {
+  position: sticky;
+  top: 16px;
+  display: grid;
+  gap: 14px;
+}
+
+.memoryPanel h2,
+.emptyDeck h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.memoryPanel p,
+.emptyDeck p {
+  margin: 0;
+  color: #667066;
+  line-height: 1.55;
+}
+
+.memoryStats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid #e4ddcf;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.memoryStats div {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  background: #faf7ee;
+}
+
+.memoryStats div + div {
+  border-left: 1px solid #e4ddcf;
+}
+
+.memoryStats strong {
+  font-size: 24px;
+}
+
+.memoryStats span {
+  color: #6f786f;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.savedList {
+  display: grid;
+  gap: 8px;
+}
+
+.savedList a {
+  display: grid;
+  gap: 3px;
+  padding: 10px;
+  border: 1px solid #e4ddcf;
+  background: #faf7ee;
+  border-radius: 8px;
+}
+
+.savedList strong,
+.savedList span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.savedList span {
+  color: #6f786f;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.emptyDeck {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  min-height: 360px;
 }
 
 .sectionHead {
@@ -697,22 +1500,91 @@ input {
 @media (max-width: 980px) {
   .heroGrid,
   .cards,
-  .scoreMethod {
+  .scoreMethod,
+  .swipeLayout,
+  .radarPanel,
+  .useCaseBar {
     grid-template-columns: 1fr;
   }
 
   .heroGrid {
     min-height: 0;
+    padding-top: 24px;
+  }
+
+  .heroCard {
+    transform: none;
+  }
+
+  .singleSwipe {
+    max-width: 560px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .memoryPanel {
+    position: static;
   }
 }
 
 @media (max-width: 640px) {
   .hero {
-    padding-top: 20px;
+    padding: 18px 18px 28px;
   }
 
   h1 {
-    font-size: 42px;
+    font-size: 38px;
+  }
+
+  .hero p {
+    margin-top: 14px;
+    font-size: 16px;
+  }
+
+  .deliveryStrip {
+    margin-top: 16px;
+  }
+
+  .heroCard {
+    min-height: 430px;
+    padding: 18px;
+  }
+
+  .heroCard h2 {
+    font-size: 30px;
+  }
+
+  .miniSignals {
+    grid-template-columns: 1fr;
+  }
+
+  .memoryBar {
+    justify-content: stretch;
+  }
+
+  .memoryBar > * {
+    flex: 1 1 130px;
+  }
+
+  .drawerOverlay {
+    align-items: flex-end;
+  }
+
+  .detailDrawer {
+    width: 100%;
+    max-height: 86vh;
+    height: auto;
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 -18px 70px rgba(0, 0, 0, 0.28);
+    transform: translateY(100%);
+  }
+
+  .drawerOverlayOpen .detailDrawer {
+    transform: translateY(0);
+  }
+
+  .drawerActions {
+    grid-template-columns: 1fr;
   }
 
   .sectionHead,

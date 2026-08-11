@@ -1,16 +1,35 @@
 # OSS Goldmine
 
-> Find buildable demand gaps in open-source software, then turn the evidence into AI-ready opportunity cards.
+> Daily opportunity radar for builders and their AI agents.
+
+Review AI-mined GitHub opportunities. Save what looks buildable. Let Codex pick if you are lazy.
+
+OSS Goldmine deals one GitHub-based startup opportunity at a time. It is a daily opportunity feed for builders and their AI coding agents.
 
 ![OSS Goldmine preview](./docs/assets/oss-goldmine-preview.svg)
 
-OSS Goldmine is not another GitHub search wrapper or abandoned-repo list.
+## Human-Readable, Agent-Readable
 
-It answers the question builders actually care about:
+This repo has two interfaces:
 
-**What small product can I build from this demand signal without cloning the original project?**
+- Humans swipe the web demo.
+- Agents read `opportunities.json`, `daily/`, and `prompts/`.
 
-## Demo
+If you do not want to browse cards yourself, paste this repo into Codex, Claude, Cursor, or another coding agent and ask it to pick the best opportunity for you.
+
+## Why This Exists
+
+Builders do not need more lists.
+
+They need a fast answer to one question:
+
+```text
+Is there a small product opportunity hiding inside this open-source demand?
+```
+
+OSS Goldmine scans GitHub signals, turns them into one-card startup opportunities, and keeps the output readable by both humans and agents.
+
+## Try It
 
 Live demo:
 
@@ -18,208 +37,100 @@ Live demo:
 https://tieguo-coder.github.io/OOS-Goldmine/
 ```
 
-If the demo is 404 after the first push, enable GitHub Pages in `Settings -> Pages -> Deploy from a branch -> gh-pages / root`.
-
-Repository setup checklist: [docs/GITHUB_SETUP.md](./docs/GITHUB_SETUP.md)
-
-## Try These Topics
-
-After running locally, try:
-
-- `API testing tools`
-- `React performance tools`
-- `database migration tools`
-- `browser developer extensions`
-- `OpenAPI security`
-
-The app includes sample opportunity cards, so the first screen is useful before any live search.
-
-## What It Generates
-
-Each opportunity card includes:
-
-- Demand Gap Score
-- Opportunity type: `Stalled`, `Overloaded`, or `Underserved`
-- Repeated demand themes
-- Build / Adapt / Watch verdict
-- Smallest useful wedge
-- Evidence links
-- AI Build Plan
-
-## Real GitHub Evidence
-
-The current version performs live GitHub evidence checks:
-
-- Fetch repository metadata
-- Fetch top open issues
-- Fetch recently closed issues
-- Fetch open pull requests
-- Fetch recent commits from the last 90 days
-- Fetch recent releases
-- Cluster repeated demand themes
-- Flag stale issues and stale PRs
-- Classify opportunities as `Stalled`, `Overloaded`, or `Underserved`
-- Penalize weak evidence and likely obsolete projects
-
-If GitHub rate limits are hit, cards are marked `Evidence limited` and downgraded to `Watch` unless demand evidence is strong enough.
-
-## Why It May Get Stars
-
-Open-source builders like tools that help them find better starting points.
-
-Most discovery tools stop at:
-
-> This repository is old.
-
-OSS Goldmine goes one step further:
-
-> This is not just a repo. This is a buildable demand gap, and this is the smallest useful wedge to build next.
-
-## How It Works
-
-1. Search GitHub by topic.
-2. Pull repository, issue, PR, commit, and release signals.
-3. Score the demand gap.
-4. Classify the opportunity.
-5. Generate an AI-ready build brief.
-
-## Demand Gap Score
-
-The score is intentionally simple and transparent:
-
-```text
-score =
-  stars signal
-+ open issue signal
-+ quiet-month signal
-+ fork signal
-+ demand issue signal
-+ stale issue signal
-- overload signal
-- active maintainer penalty
-- evidence penalty
-- archived penalty
-- obsolete penalty
-```
-
-Signal meanings:
-
-| Signal | Meaning |
-| --- | --- |
-| Stars | Historical demand and attention |
-| Open issues | Unresolved demand |
-| Quiet months | Maintenance gap |
-| Forks | Revival or adaptation interest |
-| Demand-like issues | Repeated requests for support, migration, integration, export, CLI, API, etc. |
-| Stale PRs and issue volume | Possible maintainer overload |
-| Recent commits | Active maintenance reduces the gap |
-| Stale PRs | Contributor demand may exist but review capacity may be low |
-| Penalties | Archived repos, weak issue evidence, or likely-obsolete categories |
-
-## Opportunity Types
-
-OSS Goldmine does not require every project to be old. It classifies three types of buildable gaps:
-
-| Type | Meaning | Best wedge |
-| --- | --- | --- |
-| Stalled | Long quiet project with visible unresolved demand | replacement, migration tool, modern version |
-| Overloaded | Active project with more issues or PRs than maintainers can easily absorb | plugin, automation, audit report, companion tool |
-| Underserved | Known market where a narrow workflow still looks under-served | focused developer tool, narrow workflow utility |
-
-This is not an investment verdict. It is a fast filter for builders.
-
-## Run Locally
-
-Install dependencies:
+Local:
 
 ```bash
 npm install
-```
-
-Run the API:
-
-```bash
 npm run api
-```
-
-Run the web app:
-
-```bash
 npm run dev
 ```
 
 Open:
 
 ```text
-http://127.0.0.1:5173/
+http://127.0.0.1:5173/OOS-Goldmine/
 ```
 
-Optional server token:
+## What Makes It Different
 
-```bash
-cp .env.example .env
-```
+Most tools ask you to search, compare, and think.
 
-Then edit `.env`:
+OSS Goldmine does the first pass for you:
 
-```bash
-GITHUB_TOKEN=your_read_only_github_token
-PORT=8787
-VITE_API_BASE_URL=
-```
+- One card at a time, not a noisy table.
+- `Save` or `Pass`, not another dashboard to manage.
+- Startup framing, not raw repo metadata.
+- Evidence from stars, issues, stale work, and maintainer activity.
+- Machine-readable output so Codex, Claude, Cursor, or another coding agent can read it.
 
-`.env` is ignored by git and should never be committed.
+## Use It With Codex
 
-For a deployed frontend, set `VITE_API_BASE_URL` to the public API origin, for example:
+This repo is designed to be read by agents.
 
-```bash
-VITE_API_BASE_URL=https://oss-goldmine-api.onrender.com
-```
-
-API endpoint:
+Fast prompt:
 
 ```text
-GET /api/opportunities?topic=API%20testing%20tools&page=1
+Read this OSS Goldmine repo.
+Pick the 3 opportunities that best fit an AI builder who wants small developer tools.
+For each one, explain why to build, watch, or ignore it.
 ```
 
-## Deploy the API
+Ready-made prompts:
 
-GitHub Pages can host the static app, but it cannot run the Node API. For reliable public search, deploy the API separately.
+- [`prompts/pick-opportunity.md`](./prompts/pick-opportunity.md)
+- [`prompts/build-from-card.md`](./prompts/build-from-card.md)
+- [`prompts/profile-fit.md`](./prompts/profile-fit.md)
 
-This repo includes `render.yaml` for Render:
+Agent-readable data lives in:
 
-1. Create a new Render Blueprint from this repository.
-2. Set `GITHUB_TOKEN` as a secret environment variable.
-3. Deploy the `oss-goldmine-api` web service.
-4. Confirm `https://your-api-host/health` returns `{"ok":true}`.
-5. Add a GitHub repository variable named `VITE_API_BASE_URL` with the API origin.
-6. Re-run the GitHub Pages workflow.
+- [`opportunities.json`](./opportunities.json)
+- [`daily/2026-08-07.md`](./daily/2026-08-07.md)
+- [`docs/GOLDEN_CARDS.md`](./docs/GOLDEN_CARDS.md)
 
-Without `VITE_API_BASE_URL`, the app tries `/api/opportunities` on the current origin and then falls back to direct browser GitHub requests.
+Daily card template:
 
-## GitHub Token
+- [`templates/opportunity-card.md`](./templates/opportunity-card.md)
 
-Users do not need to enter a GitHub token in the web UI.
+## Today's Sample Cards
 
-For the hosted API, set `GITHUB_TOKEN` as a server environment variable. Without a server token, the app still works, but anonymous GitHub API limits are easy to hit.
+| Opportunity | Source signal | First test |
+| --- | --- | --- |
+| Lightweight Postman migration helper | Legacy API testing demand around `brookshi/Hitchhiker` | Compare two API collections and export a migration report |
+| React render regression detector | React perf pain around `react-perf-devtool` | Turn profiler output into a shareable regression report |
+| Debugger migration checklist | Old Node debugger demand around `node-inspector` | Generate modern VS Code and Chrome DevTools migration checks |
 
-Never paste a personal token into public screenshots, issues, pull requests, or client-side code.
+## How It Works
 
-## V1 Scope
+1. Web demo lets people swipe one opportunity card at a time.
+2. This repo keeps the daily brief, source evidence, and machine-readable data.
+3. Codex / Claude / Cursor can read the repo and pick what fits the builder.
+4. The light workflow story is scan, judge, package, deliver, and remember.
 
-- GitHub only
-- No login
-- No database
-- Server-side GitHub token only
-- Web demo first
-- Respect maintainers
+## Workflow Loop
 
-## Non-goals
+OSS Goldmine is a small public artifact that shows the shape of an agent workflow:
 
-- Not a repo-shaming tool
-- Not a clone generator
-- Not a replacement for maintainers
-- Not a generic idea list
+```text
+scan -> judge -> package -> deliver -> remember
+```
+
+Built as an agent-run opportunity workflow.
+
+The repo is useful on its own, but it also hints at the bigger idea: agents can run ongoing work streams where they keep searching, judging, and delivering results.
+
+## Scope
+
+- GitHub only.
+- One card at a time.
+- Local browser memory.
+- No login in the first version.
+- No repo shaming.
+- No clone recommendations.
+- No investment advice.
+
+## Launch Copy
+
+See [LAUNCH.md](./LAUNCH.md).
 
 ## Roadmap
 
@@ -229,11 +140,7 @@ See [ROADMAP.md](./ROADMAP.md).
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
-You can open an issue to suggest an opportunity card or report a false positive.
-
-## Launch Copy
-
-See [LAUNCH.md](./LAUNCH.md).
+Open an issue if you want to suggest an opportunity card or report a false positive.
 
 ## License
 

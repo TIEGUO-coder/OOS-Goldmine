@@ -1,35 +1,43 @@
 # Roadmap
 
-OSS Goldmine should stay small, evidence-first, and screenshot-friendly.
+OSS Goldmine should feel like a daily opportunity feed, not a search dashboard.
 
-## V0.1 Current MVP
+## V0.1 Current Direction
 
-- GitHub topic search
-- Demand Gap Score
-- Opportunity type classification: Stalled, Overloaded, Underserved
-- Sample opportunity cards
-- Live GitHub repository search
-- Optional GitHub token
-- Copy AI Build Plan
-- Public API deployment path
+- One startup opportunity card at a time
+- Swipe left / right interaction
+- Local browser memory for saved and passed ideas
+- GitHub evidence behind each card
+- Machine-readable `opportunities.json`
+- Daily brief format for Codex and other coding agents
+- Light workflow attribution
 
-## V0.2 Evidence Upgrade
+## V0.2 Better Cards
 
-- Cluster top open issues more accurately
-- Separate bugs, feature requests, install problems, and stale pull requests
-- Add competitor check links
-- Add shareable card image export
-- Improve false-positive filtering
+- Improve card copy so it reads like a real opportunity, not an internal analysis
+- Add `Build / Watch / Kill` with clearer language
+- Add stronger "why now" logic
+- Add target user and first tiny test to every generated card
+- Avoid duplicate cards after save/pass
 
-## V0.3 Builder Workflow
+## V0.3 Daily Feed
 
-- Save opportunity cards locally
-- Generate README starter drafts
-- Generate launch post drafts
-- Add CLI mode
+- Auto-generate a daily markdown brief
+- Auto-update `opportunities.json`
+- Create weekly top cards
+- Add GitHub Issues as public discussion threads for saved opportunities
+
+## V0.4 Agent Workflow
+
+- Add prompts for Codex / Claude / Cursor
+- Export a card as an AI build brief
+- Let agents compare saved cards against a builder profile
+- Turn one saved card into README, prototype plan, and launch draft
 
 ## Non-goals
 
 - No repo shaming
 - No clone recommendations
-- No login or hosted user data in early versions
+- No login in early versions
+- No generic startup idea spam
+- No heavy dashboard before the card experience works
