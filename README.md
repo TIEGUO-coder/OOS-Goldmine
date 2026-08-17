@@ -8,6 +8,45 @@ OSS Goldmine deals one GitHub-based startup opportunity at a time. It is a daily
 
 ![OSS Goldmine preview](./docs/assets/oss-goldmine-preview.svg)
 
+## Weekly Demo: Opportunity Pet → MAH
+
+This week, OSS Goldmine is being extended into a clearer MAH use case:
+
+```text
+user imports their pet
+-> pet becomes a desktop assistant
+-> pet finds a money-making opportunity
+-> user clicks "查看计划"
+-> the opportunity is handed to MAH as a route map
+```
+
+The point is not just "a cute pet." The pet is the emotional entry point. OSS Goldmine is the opportunity radar. MAH is the execution system that can keep pushing the selected project through research, creation, publishing, review, and iteration.
+
+![Opportunity Pet assistant preview](./docs/assets/profit-pet-assistant-wide.png)
+
+![Opportunity Pet plan preview](./docs/assets/profit-pet-plan-wide.png)
+
+### Current weekly progress
+
+- Built the first Opportunity Pet demo on top of the existing desktop-pet codebase.
+- Kept the intended experience as a desktop assistant, not a normal webpage.
+- Added an import-your-own-pet entry for the user-owned pet flow.
+- Changed the first demo opportunity away from simple single-agent writing work.
+- Positioned the demo around projects that need MAH: route maps, scheduled tasks, and multi-agent execution.
+
+### Demo story for the weekly meeting
+
+```text
+My pet found a small money-making project.
+I approve it.
+It turns the idea into a plan.
+MAH keeps the plan moving.
+```
+
+### Next step
+
+Make the pet-photo import feel more like generating a personal desktop pet, then connect the approved opportunity to a real MAH route map.
+
 ## Human-Readable, Agent-Readable
 
 This repo has two interfaces:
